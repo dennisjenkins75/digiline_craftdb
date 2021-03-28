@@ -48,25 +48,25 @@ The 'repsonse' entry is a list (iterate via 'ipairs()') of recipe tables.
 
 Each recipe table contains the following keys:
 
-1. `inputs`: table - keys are item names, values are quanties required.
+1. `inputs` (table) - keys are item names, values are quanties required.
     Note that this is NOT the crafting grid arrangement.  This is just a
     summary of the inputs for the LUAC's convienience.
-1. `action`: string - Which type of machine to use to create the item.  Values
+1. `action` (string) - Which type of machine to use to create the item.  Values
     come directly from underlying technic and crafting tables:
-    1.   `alloy`
-    1.   `compressing`
-    1.   `extracting`
-    1.   `freezing`
-    1.   `grinding`
-    1.   `separating`
-    1.   `normal` (autocrafter)
-    1.   `cooking` (furnace)
-1.  `craft`: table - Exact shape of which item goes into each slot of the
+    1.   `alloy`        (alloy furnace, has 2 inputs)
+    1.   `compressing`  (compressor)
+    1.   `extracting`   (extractor)
+    1.   `freezing`     (freezer)
+    1.   `grinding`     (grinder)
+    1.   `separating`   (centrifuge)
+    1.   `normal`       (autocrafter)
+    1.   `cooking`      (furnace)
+1.  `craft` (table) - Exact shape of which item goes into each slot of the
     crafting grid.  Contains two elements:
-    1.  'width': number - Integer width of the crafting grid.
-    1.  'grid': table - Maps grid index (1 to width^2) to a string (item name).
-1.  `outputs`: table - Maps item names to quantities of what is produced.
-1.  `time`: number - Count of seconds required to make the item.
+    1.  `width` (number) - Integer width of the crafting grid.
+    1.  `grid` (table) - Maps grid index (1 to width^2) to a string (item name).
+1.  `outputs` (table) - Maps item names to quantities of what is produced.
+1.  `time` (number) - Count of seconds required to make the item.
 
 Examples are at the bottom of this document.
 
