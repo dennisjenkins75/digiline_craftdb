@@ -1,4 +1,4 @@
-Digiline Craft Database
+# Digiline Craft Database
 
 # Overview
 
@@ -96,7 +96,7 @@ the list is returned as-is.  If there are more initial results than
 `offset` and `max_count`.  In either case, the actual returned table is
 indexed by item name, so it is not inherently sorted.
 
-# Known Bugs:
+# Known Bugs
 
 1.  Some crafting recipes genreate a 'returned item', these returned items
     are omiited from the return results.  This is due to
