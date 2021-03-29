@@ -43,6 +43,7 @@ local _on_digiline_receive = function(pos, _, channel, msg)
       response = digiline_craftdb.craftdb:find_all_matching_items(
         msg.item, msg.offset, msg.max_count)
     }
+    digilines.receptor_send(pos, digilines.rules.default, channel, result)
   end
 end
 
