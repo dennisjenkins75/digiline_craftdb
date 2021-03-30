@@ -106,8 +106,6 @@ indexed by item name, so it is not inherently sorted.
     craftdb to jam the returned item
     in, as some recipes also take buckets of liquid and do NOT return them 
     (ex: home decor's toilet).
-1.  The node texture is terrible.  Please send a PR to fix this!  I am not
-    a pixel artist.
 
 # Examples
 
