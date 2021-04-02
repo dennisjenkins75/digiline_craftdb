@@ -31,7 +31,7 @@ local _on_digiline_receive = function(pos, _, channel, msg)
 
   if msg.command == "get" and msg.item and type(msg.item) == 'string' then
     local result = {
-      request = msg,
+      request = (msg.context and msg) or nil,
       response = digiline_craftdb.craftdb:get_all_recipes(msg.item)
     }
     digilines.receptor_send(pos, digilines.rules.default, channel, result)
@@ -39,7 +39,7 @@ local _on_digiline_receive = function(pos, _, channel, msg)
 
   if msg.command == "find" and msg.item and type(msg.item) == 'string' then
     local result = {
-      request = msg,
+      request = (msg.context and msg) or nil,
       response = digiline_craftdb.craftdb:find_all_matching_items(
         msg.item, msg.offset, msg.max_count)
     }
@@ -94,3 +94,4 @@ minetest.register_craft({
     {"", "digilines:wire_std_00000000", ""},
   },
 })
+
