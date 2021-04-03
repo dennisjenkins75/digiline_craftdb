@@ -24,11 +24,6 @@ Depends on:
     items with a matching name, and details about that item, such as its
     inventory image (for use in digistuff:touchscreen as 'addimage').
 
-All respones are tables with 2 keys: `request` and `response`, with `request`
-being a verbatim copy of the original request (so that a LUAC can send multiple
-requests and correlate the resposnes).  The sub `response` table depends on
-the API invoked.
-
 ## `get` API
 
 `get` returns a list of all crafting, cooking and technic recipes that can
@@ -36,8 +31,8 @@ produce the item specified.
 
 Digiline request message format:
 1.   `command` (string) - Literal string `get`.
-1.   `item` (string) - Full itemstring name in the form "mod_name:item_name".
-     Ex: 'technic:hv_cable'.
+1.   `item` (string) - Full (and exact) item string name in the form
+     "mod_name:item_name". Ex: 'technic:hv_cable'.
 
 Example request:
 ```lua
@@ -99,7 +94,7 @@ indexed by item name, so it is not inherently sorted.
 # Known Bugs
 
 1.  Some crafting recipes genreate a 'returned item', these returned items
-    are omiited from the return results.  This is due to
+    are omitted from the return results.  This is due to
     `minetest.get_all_craft_recipes()` not returning information on the
     'returned item'. Ex: `default.dirt` takes a `bucket:bucket_water`
     and should return `bucket:bucket_empty`.  It is not safe for the
@@ -122,31 +117,25 @@ digiline_send("craftdb", {command='get', item='default:pick_stone'})
 Response:
 ```lua
 {
-  request = {
-    item = "default:pick_stone",
-    command = "get"
-  },
-  response = {
-    {
-      inputs = {
-        ["group:stone"] = 3
-      },
-      action = "normal",
-      craft = {
-        width = 3,
-        grid = {
-          "group:stone",
-          "group:stone",
-          "group:stone",
-          [5] = "group:stick",
-          [8] = "group:stick"
-        }
-      },
-      outputs = {
-        ["default:pick_stone"] = 1
-      },
-      time = 1
-    }
+  {
+    action = "normal",
+    craft = {
+      width = 3,
+      grid = {
+        "group:stone",
+        "group:stone",
+        "group:stone",
+        [5] = "group:stick",
+        [8] = "group:stick"
+      }
+    },
+    inputs = {
+      ["group:stone"] = 3
+    },
+    outputs = {
+      ["default:pick_stone"] = 1
+    },
+    time = 1
   }
 }
 ```
@@ -162,35 +151,29 @@ digiline_send("craftdb", {command='get', item='technic:hv_battery_box0'})
 Response:
 ```lua
 {
-  request = {
-    item = "technic:hv_battery_box0",
-    command = "get"
-  },
-  response = {
-    {
-      action = "normal",
-      craft = {
-        width = 3,
-        grid = {
-          "technic:mv_battery_box0",
-          "technic:mv_battery_box0",
-          "technic:mv_battery_box0",
-          "technic:mv_battery_box0",
-          "technic:hv_transformer",
-          "technic:mv_battery_box0",
-          [8] = "technic:hv_cable"
-        }
-      },
-      inputs = {
-        ["technic:hv_cable"] = 1,
-        ["technic:mv_battery_box0"] = 5,
-        ["technic:hv_transformer"] = 1
-      },
-      outputs = {
-        ["technic:hv_battery_box0"] = 1
-      },
-      time = 1
-    }
+  {
+    action = "normal",
+    craft = {
+      width = 3,
+      grid = {
+        "technic:mv_battery_box0",
+        "technic:mv_battery_box0",
+        "technic:mv_battery_box0",
+        "technic:mv_battery_box0",
+        "technic:hv_transformer",
+        "technic:mv_battery_box0",
+        [8] = "technic:hv_cable"
+      }
+    },
+    inputs = {
+      ["technic:hv_cable"] = 1,
+      ["technic:mv_battery_box0"] = 5,
+      ["technic:hv_transformer"] = 1
+    },
+    outputs = {
+      ["technic:hv_battery_box0"] = 1
+    },
+    time = 1
   }
 }
 ```
@@ -206,21 +189,15 @@ digiline_send("craftdb", {command='get', item='technic:copper_plate'})
 Response:
 ```lua
 {
-  request = {
-    item = "technic:copper_plate",
-    command = "get"
-  },
-  response = {
-    {
-      action = "compressing",
-      inputs = {
-        ["default:copper_ingot"] = 5
-      },
-      outputs = {
-        ["technic:copper_plate"] = 1
-      },
-      time = 4
-    }
+  {
+    action = "compressing",
+    inputs = {
+      ["default:copper_ingot"] = 5
+    },
+    outputs = {
+      ["technic:copper_plate"] = 1
+    },
+    time = 4
   }
 }
 ```
@@ -235,55 +212,48 @@ digiline_send("craftdb", {command='get', item='default:bronze_ingot'})
 Response:
 ```lua
 {
-  request = {
-    item = "default:bronze_ingot",
-    command = "get"
+  {
+    action = "alloy",
+    inputs = {
+      ["default:tin_ingot"] = 1,
+      ["default:copper_ingot"] = 7
+    },
+    outputs = {
+      ["default:bronze_ingot"] = 8
+    },
+    time = 12
   },
-  response = {
-    {
-      action = "alloy",
-      inputs = {
-        ["default:tin_ingot"] = 1,
-        ["default:copper_ingot"] = 7
-      },
-      outputs = {
-        ["default:bronze_ingot"] = 8
-      },
-      time = 12
+  {
+    action = "cooking",
+    craft = {
+      width = 3,
+      grid = {
+        "technic:bronze_dust"
+      }
     },
-    {
-      action = "cooking",
-      craft = {
-        width = 3,
-        grid = {
-          "technic:bronze_dust"
-        }
-      },
-      inputs = {
-        ["technic:bronze_dust"] = 1
-      },
-      outputs = {
-        ["default:bronze_ingot"] = 1
-      },
-      time = 1
+    inputs = {
+      ["technic:bronze_dust"] = 1
     },
-    {
-      action = "normal",
-      craft = {
-        width = 1,
-        grid = {
-          "default:bronzeblock"
-        }
-      },
-      inputs = {
-        ["default:bronzeblock"] = 1
-      },
-      outputs = {
-        ["default:bronze_ingot"] = 9
-      },
-      time = 1,
-    }
+    outputs = {
+      ["default:bronze_ingot"] = 1
+    },
+    time = 1
+  },
+  {
+    action = "normal",
+    craft = {
+      width = 1,
+      grid = {
+        "default:bronzeblock"
+      }
+    },
+    inputs = {
+      ["default:bronzeblock"] = 1
+    },
+    outputs = {
+      ["default:bronze_ingot"] = 9
+    },
+    time = 1
   }
 }
 ```
-

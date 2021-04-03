@@ -9,6 +9,10 @@
 -- Some recipes have multiple inputs, some multiple outputs, some a crafting
 -- grid.  We'll just overload all of that into a single table definition.
 
+-- Count of seconds to wait after this mod loads before attempting to index
+-- all technic recipes.
+local initialization_delay = 1.0
+
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/craftdb.lua")
 
 digiline_craftdb = {}
@@ -30,19 +34,13 @@ local _on_digiline_receive = function(pos, _, channel, msg)
   if channel ~= meta:get_string("channel") then return end
 
   if msg.command == "get" and msg.item and type(msg.item) == 'string' then
-    local result = {
-      request = msg,
-      response = digiline_craftdb.craftdb:get_all_recipes(msg.item)
-    }
+    local result = digiline_craftdb.craftdb:get_all_recipes(msg.item)
     digilines.receptor_send(pos, digilines.rules.default, channel, result)
   end
 
   if msg.command == "find" and msg.item and type(msg.item) == 'string' then
-    local result = {
-      request = msg,
-      response = digiline_craftdb.craftdb:find_all_matching_items(
+    local result = digiline_craftdb.craftdb:find_all_matching_items(
         msg.item, msg.offset, msg.max_count)
-    }
     digilines.receptor_send(pos, digilines.rules.default, channel, result)
   end
 end
@@ -67,7 +65,7 @@ local function _delayed_init()
 end
 
 
-minetest.after(0.5, _delayed_init)
+minetest.after(initialization_delay, _delayed_init)
 
 minetest.register_node(minetest.get_current_modname()..":craftdb", {
   description = "Digiline Minetest Recipe Database.",
