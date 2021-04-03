@@ -1,4 +1,5 @@
 local DEBUG_MODE = false
+local MAX_MATCHES = 50
 
 CraftDB = {}
 CraftDB.__index = CraftDB
@@ -206,8 +207,8 @@ function CraftDB:find_all_matching_items(name_pattern, offset, max_count)
   if type(offset) ~= 'number' then offset = 1 end
   offset = math.max(1, offset)
 
-  if type(max_count) ~= 'number' then max_count = 20 end
-  max_count = math.min(math.max(1, max_count), 20)
+  if type(max_count) ~= 'number' then max_count = MAX_MATCHES end
+  max_count = math.min(math.max(1, max_count), MAX_MATCHES)
 
   -- Step #1, find all matching items (includes nodes, craftitems and tools).
   for name, registration in pairs(minetest.registered_items) do

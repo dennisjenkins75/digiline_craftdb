@@ -76,7 +76,7 @@ Digiline request message format:
      Use '.' to match every registered item.
 1.   `offset` (integer) - Defaults to 1.  Used to paginate the results
      if the count of items exceeds `max_count`.
-1.   `max_count` (integer) - Defaults to 20.  Must be between 1 and 20.
+1.   `max_count` (integer) - Defaults to 50.  Must be between 1 and 50.
      Maximum count of results to return.
 
 Digiline response table format:
