@@ -2,5 +2,5 @@
 
 set -e
 
-busted .
-luacheck --quiet .
+~/.luarocks/bin/mineunit --coverage --quiet
+~/.luarocks/bin/mineunit --report
