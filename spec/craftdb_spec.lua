@@ -317,10 +317,17 @@ describe("CraftDB:get_all_recipes", function()
     assert.same({}, output)
   end)
 
+  it("invalid_type", function()
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:get_all_recipes("this.should.be.a.table")
+    assert.same({}, output)
+  end)
+
   it("invalid_item", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes("no_such_mod:no_such_item")
+    local output = foo:get_all_recipes({"no_such_mod:no_such_item"})
     assert.same({}, output)
   end)
 
@@ -341,7 +348,33 @@ describe("CraftDB:get_all_recipes", function()
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes("technic:gold_dust")
+    local output = foo:get_all_recipes({"technic:gold_dust"})
+    assert.same(expected, output)
+  end)
+
+  it("multiple_items", function()
+    local expected = {
+      {
+        action = 'grinding',
+        inputs = { ['default:gold_ingot'] = 1 },
+        outputs = { ['technic:gold_dust'] = 1 },
+        time = 3,
+      }, {
+        action = 'grinding',
+        inputs = { ['default:gold_lump'] = 1 },
+        outputs = { ['technic:gold_dust'] = 2 },
+        time = 3,
+      }, {
+        action = 'extracting',
+        inputs = {["flowers:geranium"] = 1},
+        outputs = {["dye:blue"] = 4},
+        time = 4,
+      }
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:get_all_recipes({"technic:gold_dust", "dye:blue"})
     assert.same(expected, output)
   end)
 end)

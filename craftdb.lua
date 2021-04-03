@@ -165,15 +165,26 @@ function CraftDB:canonicalize_regular_recipe(regular_recipe)
 end
 
 
-function CraftDB:get_all_recipes(item_name)
-  -- Start with our technic recipes.
-  local result = self.technic_recipe_cache[item_name] or {}
+function CraftDB:get_all_recipes(item_list)
+  if type(item_list) ~= 'table' then return {} end
 
-  -- Add in regular crafting and cooking recipes.
-  local orig = minetest.get_all_craft_recipes(item_name)
-  if orig then
-    for _, regular_recipe in ipairs(orig) do
-      table.insert(result, self:canonicalize_regular_recipe(regular_recipe))
+  local result = {}
+
+  for _, item_name in ipairs(item_list) do
+    -- Start with our technic recipes.
+    local t = self.technic_recipe_cache[item_name]
+    if t then
+      for _, technic_recipe in ipairs(t) do
+        table.insert(result, technic_recipe)
+      end
+    end
+
+    -- Add in regular crafting and cooking recipes.
+    local orig = minetest.get_all_craft_recipes(item_name)
+    if orig then
+      for _, regular_recipe in ipairs(orig) do
+        table.insert(result, self:canonicalize_regular_recipe(regular_recipe))
+      end
     end
   end
 

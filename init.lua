@@ -33,8 +33,17 @@ local _on_digiline_receive = function(pos, _, channel, msg)
   local meta = minetest.get_meta(pos)
   if channel ~= meta:get_string("channel") then return end
 
-  if msg.command == "get" and msg.item and type(msg.item) == 'string' then
-    local result = digiline_craftdb.craftdb:get_all_recipes(msg.item)
+  if msg.command == "get" then
+    local items = {}
+    if msg.items and type(msg.items) == 'table' then
+      items = msg.items
+    elseif msg.item and type(msg.item) == 'string' then
+      items = {msg.item}
+    else
+      return
+    end
+
+    local result = digiline_craftdb.craftdb:get_all_recipes(items)
     digilines.receptor_send(pos, digilines.rules.default, channel, result)
   end
 

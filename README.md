@@ -17,9 +17,9 @@ Depends on:
 
 # APIs
 
-1.  `get` - Given an exact item name (ex: 'default:pick_stone', 
-    'technic:hv_battery_box0', ...), return a list
-    of all technic and regular recipes that can prodce that item.
+1.  `get` - Given an exact item name, or table of exact item names,
+    (ex: 'default:pick_stone', 'technic:hv_battery_box0', ...), return a list
+    of all technic and regular recipes that can prodce those items.
 1.  `find` - Given a partial (or full) item name, return a table of all
     items with a matching name, and details about that item, such as its
     inventory image (for use in digistuff:touchscreen as 'addimage').
@@ -27,16 +27,22 @@ Depends on:
 ## `get` API
 
 `get` returns a list of all crafting, cooking and technic recipes that can
-produce the item specified.
+produce the item(s) specified.
 
 Digiline request message format:
 1.   `command` (string) - Literal string `get`.
 1.   `item` (string) - Full (and exact) item string name in the form
      "mod_name:item_name". Ex: 'technic:hv_cable'.
+1.    `items` (table of indexed strings) - Same format as `item`.
+
+If both `item` and `items` are specified, then `items` is used and `item` is
+ignored.
 
 Example request:
 ```lua
-  { command='get', item='default:pick_stone' }
+  digiline_send ("craftdb", { command='get', item='default:pick_stone' })
+  digiline_send ("craftdb", { command='get',
+      items={ 'default:pick_stone', 'default:copper_ingot' }})
 ```
 
 The 'repsonse' entry is a list (iterate via 'ipairs()') of recipe tables.
@@ -108,7 +114,7 @@ indexed by item name, so it is not inherently sorted.
 
 ## `default:pick_stone` (crafting)
 
-Send a query for crafting recipe:
+Send a (string) query for crafting recipe:
 
 ```lua
 digiline_send("craftdb", {command='get', item='default:pick_stone'})
@@ -142,10 +148,10 @@ Response:
 
 ## `technic:hv_battery_box0` (crafting)
 
-Request:
+Request (sending table w/ 1 item):
 
 ```lua
-digiline_send("craftdb", {command='get', item='technic:hv_battery_box0'})
+digiline_send("craftdb", {command='get', items={'technic:hv_battery_box0'}})
 ```
 
 Response:
