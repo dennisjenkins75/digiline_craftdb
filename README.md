@@ -1,5 +1,7 @@
 # Digiline Craft Database
 
+[![luacheck](https://github.com/dennisjenkins75/digiline_craftdb/workflows/luacheck/badge.svg)](https://github.com/dennisjenkins75/digiline_craftdb/actions)
+
 # Overview
 
 Adds a node that is a digiline queryable database of all crafting and technic

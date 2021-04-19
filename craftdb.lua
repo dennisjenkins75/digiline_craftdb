@@ -197,8 +197,8 @@ function CraftDB:get_all_recipes(item_list)
   -- step in most LUACs that use the list in a textarea in a touchscreen
   -- (digistuff:touchscreen).
   local sort_func = function(a, b)
-    local _a, out_a = next(a.outputs, nil)
-    local _b, out_b = next(b.outputs, nil)
+    local _, out_a = next(a.outputs, nil)
+    local _, out_b = next(b.outputs, nil)
     return out_a < out_b
   end
 
