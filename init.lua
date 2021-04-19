@@ -34,7 +34,7 @@ local _on_digiline_receive = function(pos, _, channel, msg)
   if channel ~= meta:get_string("channel") then return end
 
   if msg.command == "get" then
-    local items = {}
+    local items
     if msg.items and type(msg.items) == 'table' then
       items = msg.items
     elseif msg.item and type(msg.item) == 'string' then
