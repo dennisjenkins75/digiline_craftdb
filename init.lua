@@ -77,10 +77,32 @@ end
 minetest.after(initialization_delay, _delayed_init)
 
 minetest.register_node(minetest.get_current_modname()..":craftdb", {
-  description = "Digiline Minetest Recipe Database.",
-  walkable = true,
-  tiles = {"digiline_craftdb_1.png"},
+  description = "Digiline Minetest Recipe Database",
   groups = {cracky = 3, oddly_breakable_by_hand = 2},
+  tiles = {
+    "digiline_craftdb_top.png",
+    "jeija_microcontroller_bottom.png",
+    "jeija_microcontroller_sides.png",
+    "jeija_microcontroller_sides.png",
+    "jeija_microcontroller_sides.png",
+    "jeija_microcontroller_sides.png"
+  },
+  inventory_image = "digiline_craftdb_top.png",
+  selection_box = {  -- From Luacontroller
+    type = "fixed",
+    fixed = { -8/16, -8/16, -8/16, 8/16, -5/16, 8/16 },
+  },
+  node_box = {  -- From Luacontroller
+    type = "fixed",
+    fixed = {
+      {-8/16, -8/16, -8/16, 8/16, -7/16, 8/16},  -- Bottom slab
+      {-5/16, -7/16, -5/16, 5/16, -6/16, 5/16},  -- Circuit board
+      {-3/16, -6/16, -3/16, 3/16, -5/16, 3/16},  -- IC
+    }
+  },
+  drawtype = "nodebox",
+  paramtype = "light",
+  sunlight_propagates = true,
 
   on_construct = _on_construct,
   on_receive_fields = _on_receive_fields,
