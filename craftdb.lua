@@ -148,13 +148,19 @@ end
 
 -- Converts regular recipe into our internal format.
 function CraftDB:canonicalize_regular_recipe(regular_recipe)
+  local items = regular_recipe.items
+
   return {
     action = regular_recipe.type,
     outputs = self:_merge_craft_recipe_items({regular_recipe.output}),
-    inputs = self:_merge_craft_recipe_items(regular_recipe.items),
+    inputs = self:_merge_craft_recipe_items(items),
+
+    -- 'craft' should be in the same format as one would send to the
+    -- autocrafter (eg, a 3x3 grid instead of a 9-element table).
     craft = {
-      grid = regular_recipe.items,
-      width = regular_recipe.width,
+      { items[1] or "", items[2] or "", items[3] or "" },
+      { items[4] or "", items[5] or "", items[6] or "" },
+      { items[7] or "", items[8] or "", items[9] or "" }
     },
 
     -- NOTE: Regular recipes don't have a 'time', and the autocrafter produces

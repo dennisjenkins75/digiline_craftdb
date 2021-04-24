@@ -290,14 +290,9 @@ describe("CraftDB:canonicalize_regular_recipe", function()
     local expected = {
       action = "normal",
       craft = {
-        grid = {
-          [1] = "default:steel_ingot",
-          [2] = "default:steel_ingot",
-          [3] = "default:steel_ingot",
-          [5] = "group:stick",
-          [8] = "group:stick",
-        },
-        width = 3,
+        { "default:steel_ingot", "default:steel_ingot", "default:steel_ingot" },
+        { "", "group:stick", "" },
+        { "", "group:stick", "" },
       },
       inputs = {["default:steel_ingot"] = 3, ["group:stick"] = 2},
       outputs = {["default:pick_steel"] = 1},

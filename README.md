@@ -64,10 +64,8 @@ Each recipe table contains the following keys:
     1.   `separating`   (centrifuge)
     1.   `normal`       (autocrafter)
     1.   `cooking`      (furnace)
-1.  `craft` (table) - Exact shape of which item goes into each slot of the
-    crafting grid.  Contains two elements:
-    1.  `width` (number) - Integer width of the crafting grid.
-    1.  `grid` (table) - Maps grid index (1 to width^2) to a string (item name).
+1.  `craft` (table of tables) - Actual crafting recipe, in the format that
+    the autocrafter expects.  See below for example.
 1.  `outputs` (table) - Maps item names to quantities of what is produced.
 1.  `time` (number) - Count of seconds required to make the item.
 
@@ -126,14 +124,9 @@ Response:
   {
     action = "normal",
     craft = {
-      width = 3,
-      grid = {
-        "group:stone",
-        "group:stone",
-        "group:stone",
-        [5] = "group:stick",
-        [8] = "group:stick"
-      }
+      { "group:stone", "group:stone", "group:stone" },
+      { "", "group:stick", "" },
+      { "", "group:stick", "" }
     },
     inputs = {
       ["group:stone"] = 3
@@ -160,16 +153,9 @@ Response:
   {
     action = "normal",
     craft = {
-      width = 3,
-      grid = {
-        "technic:mv_battery_box0",
-        "technic:mv_battery_box0",
-        "technic:mv_battery_box0",
-        "technic:mv_battery_box0",
-        "technic:hv_transformer",
-        "technic:mv_battery_box0",
-        [8] = "technic:hv_cable"
-      }
+      { "technic:mv_battery_box0", "technic:mv_battery_box0", "technic:mv_battery_box0" },
+      { "technic:mv_battery_box0", "technic:hv_transformer", "technic:mv_battery_box0" },
+      { "", "technic:hv_cable", "" }
     },
     inputs = {
       ["technic:hv_cable"] = 1,
@@ -208,7 +194,7 @@ Response:
 }
 ```
 
-## `default:bronze_ingot` (Three responses)
+## `default:bronze_ingot` (Three of many responses)
 
 Request:
 ```lua
@@ -231,12 +217,6 @@ Response:
   },
   {
     action = "cooking",
-    craft = {
-      width = 3,
-      grid = {
-        "technic:bronze_dust"
-      }
-    },
     inputs = {
       ["technic:bronze_dust"] = 1
     },
@@ -248,10 +228,9 @@ Response:
   {
     action = "normal",
     craft = {
-      width = 1,
-      grid = {
-        "default:bronzeblock"
-      }
+      { "default:bronzeblock", "", "" },
+      { "", "", "" },
+      { "", "", "" }
     },
     inputs = {
       ["default:bronzeblock"] = 1
