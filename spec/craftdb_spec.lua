@@ -20,6 +20,21 @@ minetest.registered_items = {
   ['farming:wheat'] = { inventory_image = 'foo.png' },
   ['dye:blue'] = { inventory_image = 'bar.png' },
   ['technic:gold_dust'] = { inventory_image = 'baz.png' },
+
+  ['default:aspen_wood'] = {
+    inventory_image = 'aspen_wood.png',
+    groups = {
+      choppy = 2,
+      wood = 1,
+    },
+  },
+  ['default:wood'] = {
+    inventory_image = 'wood.png',
+    groups = {
+      choppy = 2,
+      wood = 1,
+    },
+  },
 }
 
 -- Selection of "technic.recipes" used in some unit tests below.
@@ -304,25 +319,25 @@ describe("CraftDB:canonicalize_regular_recipe", function()
   end)
 end)
 
-describe("CraftDB:get_all_recipes", function()
+describe("CraftDB:get_recipes", function()
   it("nil", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes(nil)
+    local output = foo:get_recipes(nil)
     assert.same({}, output)
   end)
 
   it("invalid_type", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes("this.should.be.a.table")
+    local output = foo:get_recipes("this.should.be.a.table")
     assert.same({}, output)
   end)
 
   it("invalid_item", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes({"no_such_mod:no_such_item"})
+    local output = foo:get_recipes({"no_such_mod:no_such_item"})
     assert.same({}, output)
   end)
 
@@ -343,7 +358,7 @@ describe("CraftDB:get_all_recipes", function()
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes({"technic:gold_dust"})
+    local output = foo:get_recipes({"technic:gold_dust"})
     assert.same(expected, output)
   end)
 
@@ -369,20 +384,59 @@ describe("CraftDB:get_all_recipes", function()
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes({"technic:gold_dust", "dye:blue"})
+    local output = foo:get_recipes({"technic:gold_dust", "dye:blue"})
     assert.same(expected, output)
   end)
 end)
 
-describe("CraftDB:find_all_matching_items", function()
-  it("works", function()
+describe("CraftDB:search_items", function()
+  it("works_item_no_match", function()
+    local expected = { }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('dye:impossible_color', {})
+    assert.same(expected, output)
+  end)
+
+  it("works_item_plain", function()
     local expected = {
       ['dye:blue'] = { inventory_image = 'bar.png'},
     }
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:find_all_matching_items('dye:', 1, 99)
+    local output = foo:search_items('dye:blue', {
+      want_images = true,
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_item_regex", function()
+    local expected = {
+      ['dye:blue'] = { inventory_image = 'bar.png'},
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('dye:', {
+      regex_match = true,
+      want_images = true,
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group", function()
+    local expected = {
+      ['default:wood'] = { inventory_image = 'wood.png'},
+      ['default:aspen_wood'] = { inventory_image = 'aspen_wood.png'},
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      want_images = true,
+    })
     assert.same(expected, output)
   end)
 end)

@@ -45,6 +45,18 @@ local function _make_table_from_strings(string_or_table)
 end
 
 
+-- Creates a lookup table (key -> 1) from a list (int -> key).
+local function _make_lut_from_list(list)
+  local result = {}
+  if type(list) == 'table' then
+    for _, key in ipairs(list) do
+      result[key] = 1
+    end
+  end
+  return result
+end
+
+
 -- Input: "recipe.output" from a regular or technic recipe.
 --    Input can be a single string or a table (indexed) list of strings.
 -- Returns: Table in our canonical format.
@@ -171,7 +183,7 @@ function CraftDB:canonicalize_regular_recipe(regular_recipe)
 end
 
 
-function CraftDB:get_all_recipes(item_list)
+function CraftDB:get_recipes(item_list)
   if type(item_list) ~= 'table' then return {} end
 
   local result = {}
@@ -214,28 +226,83 @@ function CraftDB:get_all_recipes(item_list)
 end
 
 
--- TODO: Add filtering so we can exclude nodes made via tablesaw.
-function CraftDB:find_all_matching_items(name_pattern, offset, max_count)
+function CraftDB:search_items(name_pattern, options)
   local matching_names = {}  -- list of names
-  local image_names = {}  -- name -> image_filename
 
   if type(name_pattern) ~= 'string' then name_pattern = '.' end
 
-  if type(offset) ~= 'number' then offset = 1 end
-  offset = math.max(1, offset)
+  if type(options) ~= 'table' then options = {} end
 
-  if type(max_count) ~= 'number' then max_count = MAX_MATCHES end
-  max_count = math.min(math.max(1, max_count), MAX_MATCHES)
+  local offset = (type(options.offset) == 'number') and
+                  math.max(1, options.offset) or 1
 
-  -- Step #1, find all matching items (includes nodes, craftitems and tools).
-  for name, registration in pairs(minetest.registered_items) do
-    if string.match(name, name_pattern) then
-      table.insert(matching_names, name)
-      image_names[name] = registration["inventory_image"]
+  local max_count = (type(options.max_count) == 'number') and
+                  math.min(math.max(1, max_count), MAX_MATCHES) or MAX_MATCHES
+
+  -- Generate exclusion lookup tables from the input lists.
+  local exclude_groups = _make_lut_from_list(options['exclude_groups'])
+  local exclude_mods = _make_lut_from_list(options['exclude_mods'])
+
+  -- Are we looking up a group or item?  Groups start with 'group:'
+  local group = nil
+  if name_pattern:sub(1, 6) == 'group:' then
+    group = name_pattern:sub(7)
+  end
+
+  -- Internal helper method, uses lambda capture of 'name_pattern'.
+  local function is_name_match(name)
+    if options['regex_match'] then
+      return string.match(name, name_pattern)
+    else
+      return name == name_pattern
     end
   end
 
-  -- Step #2, stable pagination if results exceed our limit.
+  -- Internal helper method, uses lambda capture of 'group'.
+  local function is_group_match(groups)
+    return group and (groups[group] ~= nil)
+  end
+
+  -- Internal helper method, no lambda capture.
+  local function is_non_empty_string(s)
+    return type(s) == 'string' and string.len(s) > 0
+  end
+
+  -- Filter implementation, lots of captures.
+  local function keep_item(name, registration)
+    local groups = registration['groups'] or {}
+
+    -- Primary item/group matching.
+    if not (is_name_match(name) or is_group_match(groups)) then
+      return false
+    end
+
+    -- Filter out items w/ membership in any excluded groups.
+    for group, _ in pairs(groups) do
+      if exclude_groups[group] ~= nil then
+        return false
+      end
+    end
+
+    -- Filter out items from any excluded mods.
+    local mod_origin = registration['mod_origin'] or nil
+    if mod_origin and exclude_mods[mod_origin] then
+      return false
+    end
+
+    return true
+  end
+
+  -- Step #1.
+  -- Find all matching items (includes nodes, craftitems and tools).
+  for name, registration in pairs(minetest.registered_items) do
+    if keep_item(name, registration) then
+      table.insert(matching_names, name)
+    end
+  end
+
+  -- Step #2
+  -- Stable pagination if results exceed our limit.
   if (#matching_names > max_count) or (offset > 1) then
     -- Need to extract a slice of the output and return just that.
     -- Allows caller to 'page' between output results.
@@ -250,14 +317,34 @@ function CraftDB:find_all_matching_items(name_pattern, offset, max_count)
     matching_names = temp
   end
 
-  -- Now, look up an image name for each item, so that user can supply
-  -- image name to a digistuff:touchscreen for a nice craft-grid-like
-  -- display (eg, via 'addimage').
+  -- Step #3.
+  -- Look up any additional registration data for each item.  Ex: user
+  -- might want the 'inventory_image', so that they can display it in a
+  --  digistuff:touchscreen for a nice craft-grid-like display (eg, via
+  -- 'addimage').
   local result = {}
   for _, name in ipairs(matching_names) do
-    result[name] = {
-      inventory_image = image_names[name]
-    }
+    result[name] = {}
+    local registration = minetest.registered_items[name]
+    -- print(dump(registration))
+
+    if options.want_images then
+      if is_non_empty_string(registration['inventory_image']) then
+        result[name]['inventory_image'] = registration['inventory_image']
+      elseif type(registration['tiles']) == 'table' then
+        result[name]['inventory_image'] = registration['tiles'][1]
+      end
+
+      result[name]['wield_image'] = registration['wield_image']
+    end
+
+    if options.want_groups then
+      result[name]['groups'] = registration['groups']
+    end
+
+    if options.want_everything and (#matching_names == 1) then
+      result[name] = registration
+    end
   end
 
   return result
