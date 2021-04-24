@@ -237,7 +237,8 @@ function CraftDB:search_items(name_pattern, options)
                   math.max(1, options.offset) or 1
 
   local max_count = (type(options.max_count) == 'number') and
-                  math.min(math.max(1, max_count), MAX_MATCHES) or MAX_MATCHES
+                  math.min(math.max(1, options.max_count), MAX_MATCHES) or
+                  MAX_MATCHES
 
   -- Generate exclusion lookup tables from the input lists.
   local exclude_groups = _make_lut_from_list(options['exclude_groups'])
@@ -278,8 +279,8 @@ function CraftDB:search_items(name_pattern, options)
     end
 
     -- Filter out items w/ membership in any excluded groups.
-    for group, _ in pairs(groups) do
-      if exclude_groups[group] ~= nil then
+    for _group, _ in pairs(groups) do
+      if exclude_groups[_group] ~= nil then
         return false
       end
     end
