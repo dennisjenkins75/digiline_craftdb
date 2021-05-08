@@ -426,7 +426,7 @@ describe("CraftDB:search_items", function()
     assert.same(expected, output)
   end)
 
-  it("works_group", function()
+  it("works_want_group", function()
     local expected = {
       ['default:wood'] = { inventory_image = 'wood.png'},
       ['default:aspen_wood'] = { inventory_image = 'aspen_wood.png'},
@@ -439,4 +439,122 @@ describe("CraftDB:search_items", function()
     })
     assert.same(expected, output)
   end)
+
+  it("works_group_filter_boolean_exclude_nogroup", function()
+    local expected = {}
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['non_existant-group'] = true,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_boolean_include_antinogroup", function()
+    local expected = {
+      ['default:wood'] = {},
+      ['default:aspen_wood'] = {},
+    }
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['non_existant-group'] = false,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_boolean_include_group", function()
+    local expected = {
+      ['default:wood'] = {},
+      ['default:aspen_wood'] = {},
+    }
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['choppy'] = true,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_boolean_exclude_group", function()
+    local expected = {}
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['wood'] = false,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_number_include_group", function()
+    local expected = {
+      ['default:wood'] = {},
+      ['default:aspen_wood'] = {},
+    }
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['choppy'] = 2,
+        ['wood'] = 1,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_number_exclude_group", function()
+    local expected = {}
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['choppy'] = 3,  -- items have value 2.
+        ['wood'] = 1,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_number_include_group_2", function()
+    local expected = {
+      ['default:wood'] = {},
+      ['default:aspen_wood'] = {},
+    }
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('.', {
+      regex_match = true,
+      group_filter = {
+        ['choppy'] = 2,
+        ['wood'] = 1,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_unhandled_excludes_all", function()
+    -- Would have matched multiple 'group:wood' items, except the 'choppy'
+    -- group_filter is not a boolean or number.  So all items are rejected
+    -- for now.  Future enhancements might handle more complex filters.
+    local expected = {}
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('.', {
+      regex_match = true,
+      group_filter = {
+        ['choppy'] = { sub_table_not_ok_here = true },
+        ['wood'] = 1,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
 end)

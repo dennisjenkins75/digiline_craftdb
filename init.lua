@@ -63,9 +63,10 @@ end
 -- msg.options.regex_match (bool, optional, default false)
 --     Perform string.match() on the item.  If false, then used a direct
 --     string equality test.
--- msg.options.exclude_groups (table, optional):
---     List of groups to filter out.  Eg, if item is a member of this group,
---     then don't return it.
+-- msg.options.group_filter (table, optional):
+--     If present, only return items that exactly* match all of the specified
+--     groups and group values.  Table has same format as the item's registered
+--     groups table.  *Note: See examples for special matching rules.
 -- msg.options.exclude_mods (table, optional);
 --     List of module names to filter out.  If the item's registration
 --     includes ".mod_origin" and its value is in ex_mods, then omit this

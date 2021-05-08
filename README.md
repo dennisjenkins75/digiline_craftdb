@@ -93,9 +93,8 @@ Digiline request message format:
           Maximum count of results to return.
      1.   `regex_match` (boolean) - Defaults to false.  Use 'string:match()'
           to match item names instead of exact string equality test.
-     1.   `exclude_groups` (table) - Defaults to empty.  List of groups to
-          exclude items from.  That is, items belonging to these groups will
-          be excluded from the search results.
+     1.   `group_filter` (table) - Defaults to empty.  List of groups to
+          filter results by.  See examples for details.
      1.   `exclude_mods` (table) - Defaults to empty.  List of minetest mods
           to exclude items from.  Useful for finding items matching 
           `group:wood` that are not made by the tabelsaw (since you can't
@@ -345,4 +344,37 @@ Response:
   }
 }
 
+```
+
+## `group:wood`, filter for 'choppy = 2'
+
+Request:
+```lua:
+digiline_send("craftdb", {
+  command = 'search_items',
+  name = 'group:wood',
+  options = {
+    exclude_mods = { 'technic_cnc' },
+    group_filter = {
+      choppy = 2,
+    },
+  }
+})
+```
+
+Response will contain ONLY members of group 'wood' that are also members
+of 'choppy' with a value of '2'.  The same could also be accomplished with:
+
+```lua:
+digiline_send("craftdb", {
+  command = 'search_items',
+  name = '.',
+  options = {
+    exclude_mods = { 'technic_cnc' },
+    group_filter = {
+      wood = true,
+      choppy = 2,
+    },
+  }
+})
 ```

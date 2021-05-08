@@ -239,9 +239,13 @@ function CraftDB:search_items(name_pattern, options)
   local max_count = (type(options.max_count) == 'number') and
                   math.min(math.max(1, options.max_count), MAX_MATCHES) or
                   MAX_MATCHES
+  -- 'group_filter' might be nil, but if present, should always be a table.
+  local group_filter = options['group_filter']
+  if (type(group_filter) ~= 'table') and (type(group_filter) ~= nil) then
+    group_filter = {}
+  end
 
   -- Generate exclusion lookup tables from the input lists.
-  local exclude_groups = _make_lut_from_list(options['exclude_groups'])
   local exclude_mods = _make_lut_from_list(options['exclude_mods'])
 
   -- Are we looking up a group or item?  Groups start with 'group:'
@@ -269,6 +273,35 @@ function CraftDB:search_items(name_pattern, options)
     return type(s) == 'string' and string.len(s) > 0
   end
 
+  -- Internal helper method, filter items base on the item's group and
+  -- user-supplied 'options.group_filter'.  Returning 'true' keeps the item.
+  local function is_group_filter(groups)
+    -- NOTE: Currently only handles 'group attributes' that are integers.
+    -- Cannot handle tables.
+    if group_filter then
+      for g, filter_group_value in pairs(group_filter) do
+        local item_group_value = groups[g]
+
+        -- If filter for this group is a boolean, then ignore the item's
+        -- group value and accept/reject the item based solely on group
+        -- membership.
+        if type(filter_group_value) == 'boolean' then
+          if (filter_group_value and not item_group_value) or
+             (not filter_group_value and item_group_value) then
+            return false
+          end
+        elseif type(filter_group_value) == 'number' then
+          if filter_group_value ~= item_group_value then
+            return false
+          end
+        else  -- group metatype is unhandled; reject all items.
+          return false
+        end
+      end
+    end
+    return true
+  end
+
   -- Filter implementation, lots of captures.
   local function keep_item(name, registration)
     local groups = registration['groups'] or {}
@@ -279,10 +312,8 @@ function CraftDB:search_items(name_pattern, options)
     end
 
     -- Filter out items w/ membership in any excluded groups.
-    for _group, _ in pairs(groups) do
-      if exclude_groups[_group] ~= nil then
-        return false
-      end
+    if not is_group_filter(groups) then
+      return false
     end
 
     -- Filter out items from any excluded mods.
