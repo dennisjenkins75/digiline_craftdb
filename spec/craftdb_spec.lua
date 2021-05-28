@@ -591,6 +591,24 @@ describe("CraftDB:search_items", function()
     assert.same(expected, output)
   end)
 
+  it("works_want_everything", function()
+    -- Ideally, we would test this against every actual item regsitered in
+    -- minetest, as our fake test data is really insufficient for a good unit
+    -- test here.  This just just makes sure that the option doesn't lead to
+    -- an immediate crash.
+    local expected = {
+      ['dye:blue'] = { inventory_image = 'bar.png'},
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('dye:blue', {
+      want_everything = true,
+    })
+    assert.same(expected, output)
+
+  end)
+
   it("nocrash_bad_input", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)

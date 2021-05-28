@@ -56,6 +56,29 @@ local function _make_lut_from_list(list)
   return result
 end
 
+-- Return table made from 'safe' elements from a 'registration' table.
+-- Remove all functions, userdata, c++ classes, etc...
+local function copy_filtered_registration(registration)
+  local result = {}
+  local allowed_types = {
+    ['number'] = true,
+    ['boolean'] = true,
+    ['string'] = true,
+  }
+
+  -- TODO: Needs must more comprehensive unit test....
+  for k, v in pairs(registration) do
+    local t = type(v)
+    if t == 'table' then
+      result[k] = copy_filtered_registration(v)
+    elseif allowed_types[t] then
+      result[k] = v
+    end
+  end
+
+  return result
+end
+
 
 -- Input: "recipe.output" from a regular or technic recipe.
 --    Input can be a single string or a table (indexed) list of strings.
@@ -370,6 +393,11 @@ function CraftDB:search_items(name_pattern, options)
     local registration = minetest.registered_items[name]
     -- print(dump(registration))
 
+    if options.want_everything and (#matching_names == 1) then
+      result[name] = copy_filtered_registration(registration)
+      break
+    end
+
     if options.want_images then
       if is_non_empty_string(registration['inventory_image']) then
         result[name]['inventory_image'] = registration['inventory_image']
@@ -382,10 +410,6 @@ function CraftDB:search_items(name_pattern, options)
 
     if options.want_groups then
       result[name]['groups'] = registration['groups']
-    end
-
-    if options.want_everything and (#matching_names == 1) then
-      result[name] = registration
     end
   end
 
