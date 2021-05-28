@@ -52,38 +52,49 @@ end
 -- msg.name (string, required):
 --     Partial (or full) item name.  If in the format 'group:STRING', then
 --     lookup will return all items having that group.
--- msg.options (table, optional):
---     Table of additional search options, used for filtering out items that
---     you are likely not interested in for fatcory automation.
--- msg.options.offset (integer, optional, default 1):
+-- msg.offset (integer, optional, default 1):
 --     Offset for paging through large results.
--- msg.options.max_count (integer, optional, default MAX_MATCHES):
+-- msg.max_count (integer, optional, default MAX_MATCHES):
 --     Max count of items to return at once.  Capped internally (see
---     craftdb.lua:MAX_MATCHES) also, but user can request lower maximum.
--- msg.options.regex_match (bool, optional, default false)
+--     Craftdb:MAX_MATCHES) also, but user can request lower maximum.
+-- msg.regex_match (bool, optional, default false)
 --     Perform string.match() on the item.  If false, then used a direct
 --     string equality test.
--- msg.options.group_filter (table, optional):
+-- msg.group_filter (table, optional):
 --     If present, only return items that exactly* match all of the specified
 --     groups and group values.  Table has same format as the item's registered
 --     groups table.  *Note: See examples for special matching rules.
--- msg.options.exclude_mods (table, optional);
+-- msg.exclude_mods (table, optional);
 --     List of module names to filter out.  If the item's registration
 --     includes ".mod_origin" and its value is in ex_mods, then omit this
 --     item from the search results.  Common value to use here would be
 --     'technic_cnc' to filter out all items made on a tablesaw.
--- msg.options.want_images (bool, optional, defaults false):
+-- msg.want_images (bool, optional, defaults false):
 --     If true, then return the inventory_image value (or a suitable
 --     replacement) and a wield_image value (if present) for each matching item.
--- msg.options.want_groups (bool, optional, defaults false):
+-- msg.want_groups (bool, optional, defaults false):
 --     If true, thren return the groups table for each matching item.
--- msg.options.want_everything (bool, optional, defaults false):
+-- msg.want_everything (bool, optional, defaults false):
 --     If true, and there is only ONE resulting item, then return the entire
 --     item registration (this can be fairly large).
 
 local function _on_digiline_search_items(pos, channel, msg)
+  -- To reduce arg clutter, and make it easier for other mods to call our
+  -- internal API, we pack all of our "options" into a table.
+  local options = {
+    -- TODO: Sanitize/deep-copy these values?  Is that needed?
+    offset = msg['offset]'],
+    max_count = msg['max_count'],
+    regex_match = msg['regex_match'],
+    group_filter = msg['group_filter'],
+    exclude_mods = msg['exclude_mods'],
+    want_images = msg['want_images'],
+    want_groups = msg['want_groups'],
+    want_everything = msg['want_everything'],
+  }
+
   local result = digiline_craftdb.craftdb:search_items(
-      msg.name, msg.options)
+      msg.name, options)
   digilines.receptor_send(pos, digilines.rules.default, channel, result)
 end
 

@@ -557,4 +557,41 @@ describe("CraftDB:search_items", function()
     assert.same(expected, output)
   end)
 
+  it("nocrash_bad_input", function()
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+
+    local function bar() return 42 end
+
+    -- Very basic argument type checking.  For right now, if the player
+    -- gives an incorrect type or range for some parameter, we don't care
+    -- if we give them bad data back; just that we don't crash Lua itself.
+    local options = {
+      'offset', 'max_count', 'regex_match', 'group_filter', 'exclude_mods',
+      'want_images', 'want_groups', 'want_everything', '__unused',
+    }
+
+    local samples = {
+      {}, {nil}, {{nil}},
+      true, false, {true}, {false},
+      0, 1, -1, 3, 17.2, -42.1, -99999, 99999,
+      math.mininteger, math.maxinteger,
+      "0", "3", "25", "999999999999999999999999999999999999",
+      {0}, {1}, {-1}, {3}, {17.2}, {-42.1},
+      {{ {5}, {"hello"}, bar, false }},
+      {x = 1},
+      bar, {bar}, {x = bar},
+      {1, 2, "wood", bar},
+      {3, 2, nil, bar, "digistuff"},
+    }
+
+    -- Call 'CraftDB:search_items()' for the full cartesean product
+    for _, key in ipairs(options) do
+      for _, value in ipairs(samples) do
+        -- print(dump({ [key] = value }))
+        foo:search_items('.', { [key] = value })
+      end
+    end
+  end)
+
 end)

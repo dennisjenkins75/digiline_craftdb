@@ -233,12 +233,18 @@ function CraftDB:search_items(name_pattern, options)
 
   if type(options) ~= 'table' then options = {} end
 
-  local offset = (type(options.offset) == 'number') and
-                  math.max(1, options.offset) or 1
+  -- 'offset' must be an integer and >= 1.
+  -- If not, set `offset` = 1.
+  local offset = (type(options['offset']) == 'number') and
+                 math.max(1, math.floor(options['offset'])) or 1
 
-  local max_count = (type(options.max_count) == 'number') and
-                  math.min(math.max(1, options.max_count), MAX_MATCHES) or
-                  MAX_MATCHES
+  -- 'max_count' must be an integer, and 1 <= max_count <= MAX_MATCHES.
+  -- If not, set `max_count` = MAX_MATCHES.
+  local max_count = (type(options['max_count']) == 'number') and
+              math.min(math.max(1, math.floor(options['max_count'])),
+                       MAX_MATCHES) or
+              MAX_MATCHES
+
   -- 'group_filter' might be nil, but if present, should always be a table.
   local group_filter = options['group_filter']
   if (type(group_filter) ~= 'table') and (type(group_filter) ~= nil) then
