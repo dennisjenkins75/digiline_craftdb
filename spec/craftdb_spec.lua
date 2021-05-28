@@ -412,7 +412,19 @@ describe("CraftDB:search_items", function()
     assert.same(expected, output)
   end)
 
-  it("works_item_regex", function()
+  it("works_never_match", function()
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+
+    -- Using a non-string for the name_pattern will always return no matches.
+    assert.same({}, foo:search_items(nil, { substring_match = true, }))
+    assert.same({}, foo:search_items(0, { substring_match = true, }))
+    assert.same({}, foo:search_items(true, { substring_match = true, }))
+    assert.same({}, foo:search_items({}, { substring_match = true, }))
+    assert.same({}, foo:search_items(foo, { substring_match = true, }))
+  end)
+
+  it("works_item_substring_match", function()
     local expected = {
       ['dye:blue'] = { inventory_image = 'bar.png'},
     }
@@ -420,10 +432,32 @@ describe("CraftDB:search_items", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('dye:', {
-      regex_match = true,
+      substring_match = true,
       want_images = true,
     })
     assert.same(expected, output)
+  end)
+
+  it("works_item_substring_match_special", function()
+    -- There are 3 reliable ways to get list of ALL items.
+    local expected = {
+      ['default:aspen_wood'] = {},
+      ['default:wood'] = {},
+      ['dye:blue'] = {},
+      ['farming:wheat'] = {},
+      ['technic:gold_dust'] = {},
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+
+    assert.same(expected, foo:search_items('.', { substring_match = true, }))
+    assert.same(expected, foo:search_items(':', { substring_match = true, }))
+    assert.same(expected, foo:search_items('', { substring_match = true, }))
+
+    -- Test a few ways to get no items (to verify that substring_match is not
+    -- buggy and always matching everything).
+    assert.same({}, foo:search_items(';', { substring_match = true, }))
   end)
 
   it("works_want_group", function()
@@ -531,7 +565,7 @@ describe("CraftDB:search_items", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('.', {
-      regex_match = true,
+      substring_match = true,
       group_filter = {
         ['choppy'] = 2,
         ['wood'] = 1,
@@ -548,7 +582,7 @@ describe("CraftDB:search_items", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('.', {
-      regex_match = true,
+      substring_match = true,
       group_filter = {
         ['choppy'] = { sub_table_not_ok_here = true },
         ['wood'] = 1,
@@ -567,7 +601,7 @@ describe("CraftDB:search_items", function()
     -- gives an incorrect type or range for some parameter, we don't care
     -- if we give them bad data back; just that we don't crash Lua itself.
     local options = {
-      'offset', 'max_count', 'regex_match', 'group_filter', 'exclude_mods',
+      'offset', 'max_count', 'substring_match', 'group_filter', 'exclude_mods',
       'want_images', 'want_groups', 'want_everything', '__unused',
     }
 

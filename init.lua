@@ -51,14 +51,15 @@ end
 -- msg.command == 'search_items'.
 -- msg.name (string, required):
 --     Partial (or full) item name.  If in the format 'group:STRING', then
---     lookup will return all items having that group.
+--     lookup will return all items having that group.  An empty string, or '.'
+--     will match all item names.
 -- msg.offset (integer, optional, default 1):
 --     Offset for paging through large results.
 -- msg.max_count (integer, optional, default MAX_MATCHES):
 --     Max count of items to return at once.  Capped internally (see
 --     Craftdb:MAX_MATCHES) also, but user can request lower maximum.
--- msg.regex_match (bool, optional, default false)
---     Perform string.match() on the item.  If false, then used a direct
+-- msg.substring_match (bool, optional, default false)
+--     Perform string.find() on the item.  If false, then used a direct
 --     string equality test.
 -- msg.group_filter (table, optional):
 --     If present, only return items that exactly* match all of the specified
@@ -85,7 +86,7 @@ local function _on_digiline_search_items(pos, channel, msg)
     -- TODO: Sanitize/deep-copy these values?  Is that needed?
     offset = msg['offset]'],
     max_count = msg['max_count'],
-    regex_match = msg['regex_match'],
+    substring_match = msg['substring_match'],
     group_filter = msg['group_filter'],
     exclude_mods = msg['exclude_mods'],
     want_images = msg['want_images'],

@@ -229,7 +229,7 @@ end
 function CraftDB:search_items(name_pattern, options)
   local matching_names = {}  -- list of names
 
-  if type(name_pattern) ~= 'string' then name_pattern = '.' end
+  if type(name_pattern) ~= 'string' then return {} end
 
   if type(options) ~= 'table' then options = {} end
 
@@ -258,12 +258,16 @@ function CraftDB:search_items(name_pattern, options)
   local group = nil
   if name_pattern:sub(1, 6) == 'group:' then
     group = name_pattern:sub(7)
+    name_pattern = nil
   end
 
   -- Internal helper method, uses lambda capture of 'name_pattern'.
+  -- NOTE: `string.find()` treats '.' as a meta-character that will match
+  -- anything.
+  -- Should return a bool.
   local function is_name_match(name)
-    if options['regex_match'] then
-      return string.match(name, name_pattern)
+    if options['substring_match'] then
+      return nil ~= string.find(name, name_pattern)
     else
       return name == name_pattern
     end
