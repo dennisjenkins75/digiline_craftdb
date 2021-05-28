@@ -80,34 +80,33 @@ group name.  The caller can request additional data for each matching item.
 Digiline request message format:
 1.   `command` (string) - Literal string `search_items`.
 1.   `item` (string) - Search criteria; has one of three interpretations:
-     1.   Exact match on item name (`options.regex_match` is non-truthy.
-     1.   Regex match on item name (`options.regex_match` is truthy).
-          Internally, uses 'string:match()'.  Use '.' to match every
+     1.   Exact match on item name (`substring_match` is non-truthy.
+     1.   Substring match on item name (`substring_match` is truthy).
+          Internally, uses 'string:find()'.  Use '' to match every
           registered item.
      1.   Exact match on group name if `item` begins with 'group:'.
-          `options.regex_match` is ignored.
-1.   `options` (table) - Additional search options:
-     1.   `offset` (integer) - Defaults to 1.  Used to paginate the results
-          if the count of items exceeds `max_count`.
-     1.   `max_count` (integer) - Defaults to 50.  Must be between 1 and 50.
-          Maximum count of results to return.
-     1.   `regex_match` (boolean) - Defaults to false.  Use 'string:match()'
-          to match item names instead of exact string equality test.
-     1.   `group_filter` (table) - Defaults to empty.  List of groups to
-          filter results by.  See examples for details.
-     1.   `exclude_mods` (table) - Defaults to empty.  List of minetest mods
-          to exclude items from.  Useful for finding items matching 
-          `group:wood` that are not made by the tabelsaw (since you can't
-           craft most things with them).  Ex: `technic_cnc`.
-     1.   `want_images` (boolean) - Defaults to false.  If true, then return
-          the strings `inventory_image` and `wield_image` (filnames) for each
-          item.  Useful if you want to use the images in a touchscreen UI.
-     1.   `want_groups` (boolean) - Defaults to false.  If true, then return
-          the `groups` table for each matching item.
-     1.   `want_everything` (boolean) - Defaults to false.  if true, and the
-          search result contains EXACTLY 1 item, then return the ENTIRE
-          contents of `minetest.registered_items[item]` (this can be a lot of
-          data).
+          `substring_match` is ignored.
+1.   `offset` (integer) - Defaults to 1.  Used to paginate the results
+     if the count of items exceeds `max_count`.
+1.   `max_count` (integer) - Defaults to 50.  Must be between 1 and 50.
+     Maximum count of results to return.
+1.   `substring_match` (boolean) - Defaults to false.  Use 'string:find()'
+     to match item names instead of exact string equality test.
+1.   `group_filter` (table) - Defaults to empty.  List of groups to
+     filter results by.  See examples for details.
+1.   `exclude_mods` (table) - Defaults to empty.  List of minetest mods
+     to exclude items from.  Useful for finding items matching 
+     `group:wood` that are not made by the tabelsaw (since you can't
+      craft most things with them).  Ex: `technic_cnc`.
+1.   `want_images` (boolean) - Defaults to false.  If true, then return
+     the strings `inventory_image` and `wield_image` (filnames) for each
+     item.  Useful if you want to use the images in a touchscreen UI.
+1.   `want_groups` (boolean) - Defaults to false.  If true, then return
+     the `groups` table for each matching item.
+1.   `want_everything` (boolean) - Defaults to false.  if true, and the
+     search result contains EXACTLY 1 item, then return the ENTIRE
+     contents of `minetest.registered_items[item]` (this can be a lot of
+     data).
 
 Digiline response table format:
 1.   key = full item string name.  Ex: `default:pick_stone`.
@@ -281,11 +280,9 @@ Request:
 digiline_send("craftdb", {
   command = 'search_items',
   name = 'group:wood',
-  options = {
-    exclude_mods = { 'technic_cnc' },
-    want_images = true,
-    want_groups = true,
-  }
+  exclude_mods = { 'technic_cnc' },
+  want_images = true,
+  want_groups = true,
 })
 ```
 
@@ -353,12 +350,8 @@ Request:
 digiline_send("craftdb", {
   command = 'search_items',
   name = 'group:wood',
-  options = {
-    exclude_mods = { 'technic_cnc' },
-    group_filter = {
-      choppy = 2,
-    },
-  }
+  exclude_mods = { 'technic_cnc' },
+  group_filter = { choppy = 2 },
 })
 ```
 
@@ -369,12 +362,7 @@ of 'choppy' with a value of '2'.  The same could also be accomplished with:
 digiline_send("craftdb", {
   command = 'search_items',
   name = '.',
-  options = {
-    exclude_mods = { 'technic_cnc' },
-    group_filter = {
-      wood = true,
-      choppy = 2,
-    },
-  }
+  exclude_mods = { 'technic_cnc' },
+  group_filter = { wood = true, choppy = 2, },
 })
 ```
