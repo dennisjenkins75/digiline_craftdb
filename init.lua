@@ -51,8 +51,8 @@ end
 -- msg.command == 'search_items'.
 -- msg.name (string, required):
 --     Partial (or full) item name.  If in the format 'group:STRING', then
---     lookup will return all items having that group.  An empty string, or '.'
---     will match all item names.
+--     lookup will return all items having that group.  An empty string will
+--     match all item names if `substring_match` = true.
 -- msg.offset (integer, optional, default 1):
 --     Offset for paging through large results.
 -- msg.max_count (integer, optional, default MAX_MATCHES):

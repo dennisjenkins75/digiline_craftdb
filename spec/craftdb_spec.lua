@@ -451,13 +451,15 @@ describe("CraftDB:search_items", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
 
-    assert.same(expected, foo:search_items('.', { substring_match = true, }))
-    assert.same(expected, foo:search_items(':', { substring_match = true, }))
     assert.same(expected, foo:search_items('', { substring_match = true, }))
+    assert.same(expected, foo:search_items(':', { substring_match = true, }))
 
-    -- Test a few ways to get no items (to verify that substring_match is not
-    -- buggy and always matching everything).
+    -- Test a few other patterns to ensure that they either don't crash, or
+    -- return 0 matches.
     assert.same({}, foo:search_items(';', { substring_match = true, }))
+    assert.same({}, foo:search_items('.', { substring_match = true, }))
+    assert.same({}, foo:search_items('(', { substring_match = true, }))
+    assert.same({}, foo:search_items(')', { substring_match = true, }))
   end)
 
   it("works_want_group", function()
@@ -564,7 +566,7 @@ describe("CraftDB:search_items", function()
     }
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:search_items('.', {
+    local output = foo:search_items('', {
       substring_match = true,
       group_filter = {
         ['choppy'] = 2,
@@ -581,7 +583,7 @@ describe("CraftDB:search_items", function()
     local expected = {}
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:search_items('.', {
+    local output = foo:search_items('', {
       substring_match = true,
       group_filter = {
         ['choppy'] = { sub_table_not_ok_here = true },
@@ -641,7 +643,7 @@ describe("CraftDB:search_items", function()
     for _, key in ipairs(options) do
       for _, value in ipairs(samples) do
         -- print(dump({ [key] = value }))
-        foo:search_items('.', { [key] = value })
+        foo:search_items('', { [key] = value })
       end
     end
   end)

@@ -285,12 +285,10 @@ function CraftDB:search_items(name_pattern, options)
   end
 
   -- Internal helper method, uses lambda capture of 'name_pattern'.
-  -- NOTE: `string.find()` treats '.' as a meta-character that will match
-  -- anything.
   -- Should return a bool.
   local function is_name_match(name)
     if options['substring_match'] then
-      return nil ~= string.find(name, name_pattern)
+      return nil ~= string.find(name, name_pattern, nil, true)
     else
       return name == name_pattern
     end
