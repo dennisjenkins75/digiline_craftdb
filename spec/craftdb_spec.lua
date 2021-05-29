@@ -20,6 +20,21 @@ minetest.registered_items = {
   ['farming:wheat'] = { inventory_image = 'foo.png' },
   ['dye:blue'] = { inventory_image = 'bar.png' },
   ['technic:gold_dust'] = { inventory_image = 'baz.png' },
+
+  ['default:aspen_wood'] = {
+    inventory_image = 'aspen_wood.png',
+    groups = {
+      choppy = 2,
+      wood = 1,
+    },
+  },
+  ['default:wood'] = {
+    inventory_image = 'wood.png',
+    groups = {
+      choppy = 2,
+      wood = 1,
+    },
+  },
 }
 
 -- Selection of "technic.recipes" used in some unit tests below.
@@ -304,25 +319,25 @@ describe("CraftDB:canonicalize_regular_recipe", function()
   end)
 end)
 
-describe("CraftDB:get_all_recipes", function()
+describe("CraftDB:get_recipes", function()
   it("nil", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes(nil)
+    local output = foo:get_recipes(nil)
     assert.same({}, output)
   end)
 
   it("invalid_type", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes("this.should.be.a.table")
+    local output = foo:get_recipes("this.should.be.a.table")
     assert.same({}, output)
   end)
 
   it("invalid_item", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes({"no_such_mod:no_such_item"})
+    local output = foo:get_recipes({"no_such_mod:no_such_item"})
     assert.same({}, output)
   end)
 
@@ -343,7 +358,7 @@ describe("CraftDB:get_all_recipes", function()
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes({"technic:gold_dust"})
+    local output = foo:get_recipes({"technic:gold_dust"})
     assert.same(expected, output)
   end)
 
@@ -369,20 +384,268 @@ describe("CraftDB:get_all_recipes", function()
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:get_all_recipes({"technic:gold_dust", "dye:blue"})
+    local output = foo:get_recipes({"technic:gold_dust", "dye:blue"})
     assert.same(expected, output)
   end)
 end)
 
-describe("CraftDB:find_all_matching_items", function()
-  it("works", function()
+describe("CraftDB:search_items", function()
+  it("works_item_no_match", function()
+    local expected = { }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('dye:impossible_color', {})
+    assert.same(expected, output)
+  end)
+
+  it("works_item_plain", function()
     local expected = {
       ['dye:blue'] = { inventory_image = 'bar.png'},
     }
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:find_all_matching_items('dye:', 1, 99)
+    local output = foo:search_items('dye:blue', {
+      want_images = true,
+    })
     assert.same(expected, output)
   end)
+
+  it("works_never_match", function()
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+
+    -- Using a non-string for the name_pattern will always return no matches.
+    assert.same({}, foo:search_items(nil, { substring_match = true, }))
+    assert.same({}, foo:search_items(0, { substring_match = true, }))
+    assert.same({}, foo:search_items(true, { substring_match = true, }))
+    assert.same({}, foo:search_items({}, { substring_match = true, }))
+    assert.same({}, foo:search_items(foo, { substring_match = true, }))
+  end)
+
+  it("works_item_substring_match", function()
+    local expected = {
+      ['dye:blue'] = { inventory_image = 'bar.png'},
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('dye:', {
+      substring_match = true,
+      want_images = true,
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_item_substring_match_special", function()
+    -- There are 3 reliable ways to get list of ALL items.
+    local expected = {
+      ['default:aspen_wood'] = {},
+      ['default:wood'] = {},
+      ['dye:blue'] = {},
+      ['farming:wheat'] = {},
+      ['technic:gold_dust'] = {},
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+
+    assert.same(expected, foo:search_items('', { substring_match = true, }))
+    assert.same(expected, foo:search_items(':', { substring_match = true, }))
+
+    -- Test a few other patterns to ensure that they either don't crash, or
+    -- return 0 matches.
+    assert.same({}, foo:search_items(';', { substring_match = true, }))
+    assert.same({}, foo:search_items('.', { substring_match = true, }))
+    assert.same({}, foo:search_items('(', { substring_match = true, }))
+    assert.same({}, foo:search_items(')', { substring_match = true, }))
+  end)
+
+  it("works_want_group", function()
+    local expected = {
+      ['default:wood'] = { inventory_image = 'wood.png'},
+      ['default:aspen_wood'] = { inventory_image = 'aspen_wood.png'},
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      want_images = true,
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_boolean_exclude_nogroup", function()
+    local expected = {}
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['non_existant-group'] = true,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_boolean_include_antinogroup", function()
+    local expected = {
+      ['default:wood'] = {},
+      ['default:aspen_wood'] = {},
+    }
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['non_existant-group'] = false,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_boolean_include_group", function()
+    local expected = {
+      ['default:wood'] = {},
+      ['default:aspen_wood'] = {},
+    }
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['choppy'] = true,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_boolean_exclude_group", function()
+    local expected = {}
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['wood'] = false,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_number_include_group", function()
+    local expected = {
+      ['default:wood'] = {},
+      ['default:aspen_wood'] = {},
+    }
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['choppy'] = 2,
+        ['wood'] = 1,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_number_exclude_group", function()
+    local expected = {}
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('group:wood', {
+      group_filter = {
+        ['choppy'] = 3,  -- items have value 2.
+        ['wood'] = 1,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_number_include_group_2", function()
+    local expected = {
+      ['default:wood'] = {},
+      ['default:aspen_wood'] = {},
+    }
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('', {
+      substring_match = true,
+      group_filter = {
+        ['choppy'] = 2,
+        ['wood'] = 1,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_group_filter_unhandled_excludes_all", function()
+    -- Would have matched multiple 'group:wood' items, except the 'choppy'
+    -- group_filter is not a boolean or number.  So all items are rejected
+    -- for now.  Future enhancements might handle more complex filters.
+    local expected = {}
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('', {
+      substring_match = true,
+      group_filter = {
+        ['choppy'] = { sub_table_not_ok_here = true },
+        ['wood'] = 1,
+      },
+    })
+    assert.same(expected, output)
+  end)
+
+  it("works_want_everything", function()
+    -- Ideally, we would test this against every actual item regsitered in
+    -- minetest, as our fake test data is really insufficient for a good unit
+    -- test here.  This just just makes sure that the option doesn't lead to
+    -- an immediate crash.
+    local expected = {
+      ['dye:blue'] = { inventory_image = 'bar.png'},
+    }
+
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:search_items('dye:blue', {
+      want_everything = true,
+    })
+    assert.same(expected, output)
+
+  end)
+
+  it("nocrash_bad_input", function()
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+
+    local function bar() return 42 end
+
+    -- Very basic argument type checking.  For right now, if the player
+    -- gives an incorrect type or range for some parameter, we don't care
+    -- if we give them bad data back; just that we don't crash Lua itself.
+    local options = {
+      'offset', 'max_count', 'substring_match', 'group_filter', 'exclude_mods',
+      'want_images', 'want_groups', 'want_everything', '__unused',
+    }
+
+    local samples = {
+      {}, {nil}, {{nil}},
+      true, false, {true}, {false},
+      0, 1, -1, 3, 17.2, -42.1, -99999, 99999,
+      math.mininteger, math.maxinteger,
+      "0", "3", "25", "999999999999999999999999999999999999",
+      {0}, {1}, {-1}, {3}, {17.2}, {-42.1},
+      {{ {5}, {"hello"}, bar, false }},
+      {x = 1},
+      bar, {bar}, {x = bar},
+      {1, 2, "wood", bar},
+      {3, 2, nil, bar, "digistuff"},
+    }
+
+    -- Call 'CraftDB:search_items()' for the full cartesean product
+    for _, key in ipairs(options) do
+      for _, value in ipairs(samples) do
+        -- print(dump({ [key] = value }))
+        foo:search_items('', { [key] = value })
+      end
+    end
+  end)
+
 end)

@@ -19,9 +19,84 @@ digiline_craftdb = {}
 digiline_craftdb.craftdb = CraftDB.new()
 
 
-local _on_construct = function(pos)
+local function _on_construct(pos)
   local formspec = "field[channel;Channel;${channel}]"
   minetest.get_meta(pos):set_string("formspec", formspec)
+end
+
+-- 'get_recipes' command
+-- msg.command == 'get_recipes'
+-- msg.item (string, optional):
+--    Full item name of get recipes for (ex: 'default:pick_steel').
+-- msg.items (table, optional):
+--    List of full item names to get recipes for.
+--    Ex: {'default:pick_steel', 'default:wood'}
+
+local function _on_digiline_get_recipes(pos, channel, msg)
+    local items
+    if msg.items and type(msg.items) == 'table' then
+      items = msg.items
+    elseif msg.item and type(msg.item) == 'string' then
+      items = {msg.item}
+    else
+      return
+    end
+
+    local result = digiline_craftdb.craftdb:get_recipes(items)
+    digilines.receptor_send(pos, digilines.rules.default, channel, result)
+end
+
+
+-- 'search_items' command
+-- msg.command == 'search_items'.
+-- msg.name (string, required):
+--     Partial (or full) item name.  If in the format 'group:STRING', then
+--     lookup will return all items having that group.  An empty string will
+--     match all item names if `substring_match` = true.
+-- msg.offset (integer, optional, default 1):
+--     Offset for paging through large results.
+-- msg.max_count (integer, optional, default MAX_MATCHES):
+--     Max count of items to return at once.  Capped internally (see
+--     Craftdb:MAX_MATCHES) also, but user can request lower maximum.
+-- msg.substring_match (bool, optional, default false)
+--     Perform string.find() on the item.  If false, then used a direct
+--     string equality test.
+-- msg.group_filter (table, optional):
+--     If present, only return items that exactly* match all of the specified
+--     groups and group values.  Table has same format as the item's registered
+--     groups table.  *Note: See examples for special matching rules.
+-- msg.exclude_mods (table, optional);
+--     List of module names to filter out.  If the item's registration
+--     includes ".mod_origin" and its value is in ex_mods, then omit this
+--     item from the search results.  Common value to use here would be
+--     'technic_cnc' to filter out all items made on a tablesaw.
+-- msg.want_images (bool, optional, defaults false):
+--     If true, then return the inventory_image value (or a suitable
+--     replacement) and a wield_image value (if present) for each matching item.
+-- msg.want_groups (bool, optional, defaults false):
+--     If true, thren return the groups table for each matching item.
+-- msg.want_everything (bool, optional, defaults false):
+--     If true, and there is only ONE resulting item, then return the entire
+--     item registration (this can be fairly large).
+
+local function _on_digiline_search_items(pos, channel, msg)
+  -- To reduce arg clutter, and make it easier for other mods to call our
+  -- internal API, we pack all of our "options" into a table.
+  local options = {
+    -- TODO: Sanitize/deep-copy these values?  Is that needed?
+    offset = msg['offset]'],
+    max_count = msg['max_count'],
+    substring_match = msg['substring_match'],
+    group_filter = msg['group_filter'],
+    exclude_mods = msg['exclude_mods'],
+    want_images = msg['want_images'],
+    want_groups = msg['want_groups'],
+    want_everything = msg['want_everything'],
+  }
+
+  local result = digiline_craftdb.craftdb:search_items(
+      msg.name, options)
+  digilines.receptor_send(pos, digilines.rules.default, channel, result)
 end
 
 
@@ -33,29 +108,21 @@ local _on_digiline_receive = function(pos, _, channel, msg)
   local meta = minetest.get_meta(pos)
   if channel ~= meta:get_string("channel") then return end
 
-  if msg.command == "get" then
-    local items
-    if msg.items and type(msg.items) == 'table' then
-      items = msg.items
-    elseif msg.item and type(msg.item) == 'string' then
-      items = {msg.item}
-    else
-      return
-    end
-
-    local result = digiline_craftdb.craftdb:get_all_recipes(items)
-    digilines.receptor_send(pos, digilines.rules.default, channel, result)
+  -- Find recipes that match 'msg.item' (string) or 'msg.items' (table)
+  if msg.command == "get_recipes" then
+    _on_digiline_get_recipes(pos, channel, msg)
   end
 
-  if msg.command == "find" and msg.item and type(msg.item) == 'string' then
-    local result = digiline_craftdb.craftdb:find_all_matching_items(
-        msg.item, msg.offset, msg.max_count)
-    digilines.receptor_send(pos, digilines.rules.default, channel, result)
+  -- Search for all registered items that match the supplied
+  -- item name or group, and optionally exlcude items from specific
+  -- groups or mod_origin.
+  if msg.command == "search_items" then
+    _on_digiline_search_items(pos, channel, msg)
   end
 end
 
 
-local _on_receive_fields = function(pos, _, fields, sender)
+local function _on_receive_fields(pos, _, fields, sender)
   local name = sender:get_player_name()
   if minetest.is_protected(pos, name) and
       not minetest.check_player_privs(name, {protection_bypass=true}) then

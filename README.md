@@ -19,17 +19,18 @@ Depends on:
 
 # APIs
 
-1.  `get` - Given an exact item name, or table of exact item names,
+1.  `get_recipes` - Given an exact item name, or table of exact item names,
     (ex: 'default:pick_stone', 'technic:hv_battery_box0', ...), return a list
     of all technic and regular recipes that can prodce those items.
-1.  `find` - Given a partial (or full) item name, return a table of all
-    items with a matching name, and details about that item, such as its
-    inventory image (for use in digistuff:touchscreen as 'addimage').
+1.  `search_items` - Given a partial (or full) item name, or full group name,
+    return a table of all items with a matching name, and details about that
+    item, such as its inventory image (for use in digistuff:touchscreen as
+    'addimage').
 
-## `get` API
+## `get_recipes` API
 
-`get` returns a list of all crafting, cooking and technic recipes that can
-produce the item(s) specified.
+`get_recipes` returns a list of all crafting, cooking and technic recipes that
+can produce the item(s) specified.
 
 Digiline request message format:
 1.   `command` (string) - Literal string `get`.
@@ -47,7 +48,7 @@ Example request:
       items={ 'default:pick_stone', 'default:copper_ingot' }})
 ```
 
-The 'repsonse' entry is a list (iterate via 'ipairs()') of recipe tables.
+The 'repsonse' entry is a list (iterate via `ipairs()`) of recipe tables.
 
 Each recipe table contains the following keys:
 
@@ -71,25 +72,51 @@ Each recipe table contains the following keys:
 
 Examples are at the bottom of this document.
 
-## `find` API
+## `search_items` API
 
-`find` returns a table of matching item strings and their inventory images.
-Additional data might be added in future revisions of this mod.
+`search_items`  returns a table of items matching the supplied item name or
+group name.  The caller can request additional data for each matching item.
 
 Digiline request message format:
-1.   `command` (string) - Literal string `find`.
-1.   `item` (string) - Any valid matcher passable to 'string:match()'.
-     Use '.' to match every registered item.
+1.   `command` (string) - Literal string `search_items`.
+1.   `item` (string) - Search criteria; has one of three interpretations:
+     1.   Exact match on item name (`substring_match` is non-truthy.
+     1.   Substring match on item name (`substring_match` is truthy).
+          Internally, uses 'string:find()'.  Use '' to match every
+          registered item.
+     1.   Exact match on group name if `item` begins with 'group:'.
+          `substring_match` is ignored.
 1.   `offset` (integer) - Defaults to 1.  Used to paginate the results
      if the count of items exceeds `max_count`.
 1.   `max_count` (integer) - Defaults to 50.  Must be between 1 and 50.
      Maximum count of results to return.
+1.   `substring_match` (boolean) - Defaults to false.  Use 'string:find()'
+     to match item names instead of exact string equality test.
+1.   `group_filter` (table) - Defaults to empty.  List of groups to
+     filter results by.  See examples for details.
+1.   `exclude_mods` (table) - Defaults to empty.  List of minetest mods
+     to exclude items from.  Useful for finding items matching 
+     `group:wood` that are not made by the tabelsaw (since you can't
+      craft most things with them).  Ex: `technic_cnc`.
+1.   `want_images` (boolean) - Defaults to false.  If true, then return
+     the strings `inventory_image` and `wield_image` (filnames) for each
+     item.  Useful if you want to use the images in a touchscreen UI.
+1.   `want_groups` (boolean) - Defaults to false.  If true, then return
+     the `groups` table for each matching item.
+1.   `want_everything` (boolean) - Defaults to false.  if true, and the
+     search result contains EXACTLY 1 item, then return the ENTIRE
+     contents of `minetest.registered_items[item]` (this can be a lot of
+     data).
 
 Digiline response table format:
-1.   key = full item string name.  Ex: 'default:pick_stone'.
+1.   key = full item string name.  Ex: `default:pick_stone`.
 1.   value = table:
      1.   `inventory_image` - The inventory image filename copied from the
-          item registration.
+          item registration.  If this field is empty, then the first tile
+          image filename.
+     1.   `wield_image` - The value of `.wield_image`, if present.
+     1.   `groups` - Table mapping group name to whatever (usually integers).
+          Consult the minetest developer's guide for details.
 
 If the `item` pattern results in fewer than `max_count`+1 matching items, then
 the list is returned as-is.  If there are more initial results than
@@ -108,6 +135,8 @@ indexed by item name, so it is not inherently sorted.
     in, as some recipes also take buckets of liquid and do NOT return them 
     (ex: home decor's toilet).
 
+1.  Lacks comprehensive unit testing for the `search_items` API.
+
 # Examples
 
 ## `default:pick_stone` (crafting)
@@ -115,7 +144,7 @@ indexed by item name, so it is not inherently sorted.
 Send a (string) query for crafting recipe:
 
 ```lua
-digiline_send("craftdb", {command='get', item='default:pick_stone'})
+digiline_send("craftdb", {command='get_recipes', item='default:pick_stone'})
 ```
 
 Response:
@@ -144,7 +173,8 @@ Response:
 Request (sending table w/ 1 item):
 
 ```lua
-digiline_send("craftdb", {command='get', items={'technic:hv_battery_box0'}})
+digiline_send("craftdb", {command='get_recipes',
+                          items={'technic:hv_battery_box0'}})
 ```
 
 Response:
@@ -175,7 +205,7 @@ Response:
 Request:
 
 ```lua
-digiline_send("craftdb", {command='get', item='technic:copper_plate'})
+digiline_send("craftdb", {command='get_recipes', item='technic:copper_plate'})
 ```
 
 Response:
@@ -198,7 +228,7 @@ Response:
 
 Request:
 ```lua
-digiline_send("craftdb", {command='get', item='default:bronze_ingot'})
+digiline_send("craftdb", {command='get_recipes', item='default:bronze_ingot'})
 ```
 
 Response:
@@ -241,4 +271,98 @@ Response:
     time = 1
   }
 }
+```
+
+## `group:wood` (Search for valid wood plank items)
+
+Request:
+```lua:
+digiline_send("craftdb", {
+  command = 'search_items',
+  name = 'group:wood',
+  exclude_mods = { 'technic_cnc' },
+  want_images = true,
+  want_groups = true,
+})
+```
+
+Response:
+```lua
+{
+  ["default:junglewood"] = {
+    inventory_image = "default_junglewood.png",
+    groups = {
+      wood = 1,
+      choppy = 2,
+      oddly_breakable_by_hand = 2,
+      flammable = 2
+    },
+    wield_image = ""
+  },
+  ["default:aspen_wood"] = {
+    inventory_image = "default_aspen_wood.png",
+    groups = {
+      wood = 1,
+      choppy = 3,
+      oddly_breakable_by_hand = 2,
+      flammable = 3
+    },
+    wield_image = ""
+  },
+  ["default:wood"] = {
+    inventory_image = "default_wood.png",
+    groups = {
+      wood = 1,
+      choppy = 2,
+      oddly_breakable_by_hand = 2,
+      flammable = 2
+    },
+    wield_image = ""
+  },
+  ["default:pine_wood"] = {
+    inventory_image = "default_pine_wood.png",
+    groups = {
+      wood = 1,
+      choppy = 3,
+      oddly_breakable_by_hand = 2,
+      flammable = 3
+    },
+    wield_image = ""
+  },
+  ["default:acacia_wood"] = {
+    inventory_image = "default_acacia_wood.png",
+    groups = {
+      wood = 1,
+      choppy = 2,
+      oddly_breakable_by_hand = 2,
+      flammable = 2
+    },
+    wield_image = ""
+  }
+}
+
+```
+
+## `group:wood`, filter for 'choppy = 2'
+
+Request:
+```lua:
+digiline_send("craftdb", {
+  command = 'search_items',
+  name = 'group:wood',
+  exclude_mods = { 'technic_cnc' },
+  group_filter = { choppy = 2 },
+})
+```
+
+Response will contain ONLY members of group 'wood' that are also members
+of 'choppy' with a value of '2'.  The same could also be accomplished with:
+
+```lua:
+digiline_send("craftdb", {
+  command = 'search_items',
+  name = '.',
+  exclude_mods = { 'technic_cnc' },
+  group_filter = { wood = true, choppy = 2, },
+})
 ```
