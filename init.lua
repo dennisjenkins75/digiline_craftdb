@@ -114,7 +114,7 @@ local _on_digiline_receive = function(pos, _, channel, msg)
   end
 
   -- Search for all registered items that match the supplied
-  -- item name or group, and optionally exlcude items from specific
+  -- item name or group, and optionally exclude items from specific
   -- groups or mod_origin.
   if msg.command == "search_items" then
     _on_digiline_search_items(pos, channel, msg)

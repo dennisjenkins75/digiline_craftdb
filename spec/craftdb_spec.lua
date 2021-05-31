@@ -482,7 +482,7 @@ describe("CraftDB:search_items", function()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('group:wood', {
       group_filter = {
-        ['non_existant-group'] = true,
+        ['non_existent-group'] = true,
       },
     })
     assert.same(expected, output)
@@ -497,7 +497,7 @@ describe("CraftDB:search_items", function()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('group:wood', {
       group_filter = {
-        ['non_existant-group'] = false,
+        ['non_existent-group'] = false,
       },
     })
     assert.same(expected, output)

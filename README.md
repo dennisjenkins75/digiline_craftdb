@@ -48,7 +48,7 @@ Example request:
       items={ 'default:pick_stone', 'default:copper_ingot' }})
 ```
 
-The 'repsonse' entry is a list (iterate via `ipairs()`) of recipe tables.
+The 'response' entry is a list (iterate via `ipairs()`) of recipe tables.
 
 Each recipe table contains the following keys:
 
