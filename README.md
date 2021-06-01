@@ -361,7 +361,7 @@ of 'choppy' with a value of '2'.  The same could also be accomplished with:
 ```lua:
 digiline_send("craftdb", {
   command = 'search_items',
-  name = '.',
+  name = ':',
   exclude_mods = { 'technic_cnc' },
   group_filter = { wood = true, choppy = 2, },
 })
