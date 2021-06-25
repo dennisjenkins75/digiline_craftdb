@@ -33,7 +33,7 @@ Depends on:
 can produce the item(s) specified.
 
 Digiline request message format:
-1.   `command` (string) - Literal string `get`.
+1.   `command` (string) - Literal string `get_recipes`.
 1.   `item` (string) - Full (and exact) item string name in the form
      "mod_name:item_name". Ex: 'technic:hv_cable'.
 1.    `items` (table of indexed strings) - Same format as `item`.
@@ -43,8 +43,8 @@ ignored.
 
 Example request:
 ```lua
-  digiline_send ("craftdb", { command='get', item='default:pick_stone' })
-  digiline_send ("craftdb", { command='get',
+  digiline_send ("craftdb", { command='get_recipes', item='default:pick_stone' })
+  digiline_send ("craftdb", { command='get_recipes',
       items={ 'default:pick_stone', 'default:copper_ingot' }})
 ```
 
