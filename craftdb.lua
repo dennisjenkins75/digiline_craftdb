@@ -287,7 +287,7 @@ function CraftDB:search_items(name_pattern, options)
   -- Internal helper method, uses lambda capture of 'name_pattern'.
   -- Should return a bool.
   local function is_name_match(name)
-    if options['substring_match'] then
+    if options['substring_match'] and name_pattern then
       return nil ~= string.find(name, name_pattern, nil, true)
     else
       return name == name_pattern
