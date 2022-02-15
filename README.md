@@ -79,7 +79,7 @@ group name.  The caller can request additional data for each matching item.
 
 Digiline request message format:
 1.   `command` (string) - Literal string `search_items`.
-1.   `item` (string) - Search criteria; has one of three interpretations:
+1.   `name` (string) - Search criteria; has one of three interpretations:
      1.   Exact match on item name (`substring_match` is non-truthy.
      1.   Substring match on item name (`substring_match` is truthy).
           Internally, uses 'string:find()'.  Use '' to match every
@@ -118,7 +118,7 @@ Digiline response table format:
      1.   `groups` - Table mapping group name to whatever (usually integers).
           Consult the minetest developer's guide for details.
 
-If the `item` pattern results in fewer than `max_count`+1 matching items, then
+If the `name` pattern results in fewer than `max_count`+1 matching items, then
 the list is returned as-is.  If there are more initial results than
 `max_count`, then the list is sorted by item string, then paginated by
 `offset` and `max_count`.  In either case, the actual returned table is
