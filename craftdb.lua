@@ -381,10 +381,7 @@ function CraftDB:search_items(name_pattern, options)
   end
 
   -- Step #3.
-  -- Look up any additional registration data for each item.  Ex: user
-  -- might want the 'inventory_image', so that they can display it in a
-  --  digistuff:touchscreen for a nice craft-grid-like display (eg, via
-  -- 'addimage').
+  -- Look up any additional registration data for each item.
   local result = {}
   for _, name in ipairs(matching_names) do
     result[name] = {}

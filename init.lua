@@ -84,7 +84,7 @@ local function _on_digiline_search_items(pos, channel, msg)
   -- internal API, we pack all of our "options" into a table.
   local options = {
     -- TODO: Sanitize/deep-copy these values?  Is that needed?
-    offset = msg['offset]'],
+    offset = msg['offset'],
     max_count = msg['max_count'],
     substring_match = msg['substring_match'],
     group_filter = msg['group_filter'],
