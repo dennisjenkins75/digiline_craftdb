@@ -4,12 +4,12 @@
 
 # Overview
 
-Adds a node that is a digiline queryable database of all crafting and technic
+Adds a craftable "digiline queryable database" node of all crafting and technic
 recipes known to the game engine.
 
 This node can be used with a lua controller, lua sorting tubes and various
 technic machines to create a fully automated 'Universal Autocrafting
-Machine', which can recursively build anything (ex: technic:hv_battery_box0).
+Machine', which can recursively build anything (ex: `technic:hv_battery_box0`).
 
 # Dependencies
 
@@ -24,7 +24,7 @@ Depends on:
     of all technic and regular recipes that can prodce those items.
 1.  `search_items` - Given a partial (or full) item name, or full group name,
     return a table of all items with a matching name, and details about that
-    item, such as its inventory image (for use in digistuff:touchscreen as
+    item, such as its inventory image (for use in `digistuff:touchscreen` as
     'addimage').
 
 ## `get_recipes` API
@@ -35,7 +35,7 @@ can produce the item(s) specified.
 Digiline request message format:
 1.   `command` (string) - Literal string `get_recipes`.
 1.   `item` (string) - Full (and exact) item string name in the form
-     "mod_name:item_name". Ex: 'technic:hv_cable'.
+     "mod_name:item_name". Ex: `technic:hv_cable`.
 1.    `items` (table of indexed strings) - Same format as `item`.
 
 If both `item` and `items` are specified, then `items` is used and `item` is
@@ -43,18 +43,19 @@ ignored.
 
 Example request:
 ```lua
-  digiline_send ("craftdb", { command='get_recipes', item='default:pick_stone' })
+  digiline_send ("craftdb", { command='get_recipes',
+      item='default:pick_stone' })
   digiline_send ("craftdb", { command='get_recipes',
       items={ 'default:pick_stone', 'default:copper_ingot' }})
 ```
 
-The 'response' entry is a list (iterate via `ipairs()`) of recipe tables.
+The 'response' entry is an `ipairs` iterable list of recipe tables.
 
 Each recipe table contains the following keys:
 
 1. `inputs` (table) - keys are item names, values are quanties required.
     Note that this is NOT the crafting grid arrangement.  This is just a
-    summary of the inputs for the LUAC's convienience.
+    summary of the inputs for the LUAC's convenience.
 1. `action` (string) - Which type of machine to use to create the item.  Values
     come directly from underlying technic and crafting tables:
     1.   `alloy`        (alloy furnace, has 2 inputs)
@@ -80,9 +81,9 @@ group name.  The caller can request additional data for each matching item.
 Digiline request message format:
 1.   `command` (string) - Literal string `search_items`.
 1.   `name` (string) - Search criteria; has one of three interpretations:
-     1.   Exact match on item name (`substring_match` is non-truthy.
+     1.   Exact match on item name (`substring_match` is non-truthy).
      1.   Substring match on item name (`substring_match` is truthy).
-          Internally, uses 'string:find()'.  Use '' to match every
+          Internally, uses `string:find()`.  Use an empty string to match every
           registered item.
      1.   Exact match on group name if `item` begins with 'group:'.
           `substring_match` is ignored.
@@ -94,6 +95,9 @@ Digiline request message format:
      to match item names instead of exact string equality test.
 1.   `group_filter` (table) - Defaults to empty.  List of groups to
      filter results by.  See examples for details.
+     1.   You usually want to specify `not_in_creative_inventory=false` in
+          the group filter, or the result will likely contain many
+          non-craftable items.
 1.   `exclude_mods` (table) - Defaults to empty.  List of minetest mods
      to exclude items from.  Useful for finding items matching 
      `group:wood` that are not made by the tabelsaw (since you can't
@@ -113,7 +117,10 @@ Digiline response table format:
 1.   value = table:
      1.   `inventory_image` - The inventory image filename copied from the
           item registration.  If this field is empty, then the first tile
-          image filename.
+          image filename.  NOTE: If your goal is to display the item's
+          inventory_image on a `digistuff:touchscreen`, then you do not want
+          this image.  Rather, pass the raw item name to a touchscreen's
+          `item_image` or `item_image_button` widget.
      1.   `wield_image` - The value of `.wield_image`, if present.
      1.   `groups` - Table mapping group name to whatever (usually integers).
           Consult the minetest developer's guide for details.
@@ -364,5 +371,17 @@ digiline_send("craftdb", {
   name = ':',
   exclude_mods = { 'technic_cnc' },
   group_filter = { wood = true, choppy = 2, },
+})
+```
+
+## All craftable protected technic chests.
+
+Request (note the group filter used to exclude non-craftable colored chests):
+```lua:
+digiline_send("craftdb", {
+  command = 'search_items',
+  name = 'protected_chjest',
+  exclude_mods = { 'technic_cnc' },
+  group_filter = { not_in_creative_inventory=false },
 })
 ```
