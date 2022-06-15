@@ -43,10 +43,10 @@ ignored.
 
 Example request:
 ```lua
-  digiline_send ("craftdb", { command='get_recipes',
-      item='default:pick_stone' })
-  digiline_send ("craftdb", { command='get_recipes',
-      items={ 'default:pick_stone', 'default:copper_ingot' }})
+  digiline_send ("craftdb", { command = 'get_recipes',
+      item = 'default:pick_stone' })
+  digiline_send ("craftdb", { command = 'get_recipes',
+      items = { 'default:pick_stone', 'default:copper_ingot' }})
 ```
 
 The 'response' entry is an `ipairs` iterable list of recipe tables.
@@ -95,7 +95,7 @@ Digiline request message format:
      to match item names instead of exact string equality test.
 1.   `group_filter` (table) - Defaults to empty.  List of groups to
      filter results by.  See examples for details.
-     1.   You usually want to specify `not_in_creative_inventory=false` in
+     1.   You usually want to specify `not_in_creative_inventory = false` in
           the group filter, or the result will likely contain many
           non-craftable items.
 1.   `exclude_mods` (table) - Defaults to empty.  List of minetest mods
@@ -151,7 +151,7 @@ indexed by item name, so it is not inherently sorted.
 Send a (string) query for crafting recipe:
 
 ```lua
-digiline_send("craftdb", {command='get_recipes', item='default:pick_stone'})
+digiline_send("craftdb", {command = 'get_recipes', item = 'default:pick_stone'})
 ```
 
 Response:
@@ -180,8 +180,8 @@ Response:
 Request (sending table w/ 1 item):
 
 ```lua
-digiline_send("craftdb", {command='get_recipes',
-                          items={'technic:hv_battery_box0'}})
+digiline_send("craftdb", {command = 'get_recipes',
+                          items = {'technic:hv_battery_box0'}})
 ```
 
 Response:
@@ -212,7 +212,7 @@ Response:
 Request:
 
 ```lua
-digiline_send("craftdb", {command='get_recipes', item='technic:copper_plate'})
+digiline_send("craftdb", {command = 'get_recipes', item = 'technic:copper_plate'})
 ```
 
 Response:
@@ -235,7 +235,7 @@ Response:
 
 Request:
 ```lua
-digiline_send("craftdb", {command='get_recipes', item='default:bronze_ingot'})
+digiline_send("craftdb", {command = 'get_recipes', item = 'default:bronze_ingot'})
 ```
 
 Response:
@@ -380,8 +380,8 @@ Request (note the group filter used to exclude non-craftable colored chests):
 ```lua:
 digiline_send("craftdb", {
   command = 'search_items',
-  name = 'protected_chjest',
+  name = 'protected_chest',
   exclude_mods = { 'technic_cnc' },
-  group_filter = { not_in_creative_inventory=false },
+  group_filter = { not_in_creative_inventory = false },
 })
 ```
