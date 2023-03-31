@@ -17,23 +17,17 @@ function minetest.get_all_craft_recipes(item_name)
 end
 
 minetest.registered_items = {
-  ['farming:wheat'] = { inventory_image = 'foo.png' },
-  ['dye:blue'] = { inventory_image = 'bar.png' },
-  ['technic:gold_dust'] = { inventory_image = 'baz.png' },
+  ['farming:wheat'] = {inventory_image = 'foo.png'},
+  ['dye:blue'] = {inventory_image = 'bar.png'},
+  ['technic:gold_dust'] = {inventory_image = 'baz.png'},
 
   ['default:aspen_wood'] = {
     inventory_image = 'aspen_wood.png',
-    groups = {
-      choppy = 2,
-      wood = 1,
-    },
+    groups = {choppy = 2, wood = 1},
   },
   ['default:wood'] = {
     inventory_image = 'wood.png',
-    groups = {
-      choppy = 2,
-      wood = 1,
-    },
+    groups = {choppy = 2, wood = 1},
   },
 }
 
@@ -45,82 +39,69 @@ local technic_recipes = {
       ["farming:wheat"] = {
         input = {["farming:wheat"] = 4},
         time = 10,
-        output = {
-          "farming:seed_wheat 3",
-          "default:dry_shrub"
-        }
+        output = {"farming:seed_wheat 3", "default:dry_shrub"},
       },
     },
     output_size = 2,
     input_size = 1,
-    description = "Separating"
+    description = "Separating",
   },
-  cooking = {
-    input_size = 1,
-    output_size = 1
-  },
+  cooking = {input_size = 1, output_size = 1},
   extracting = {
     recipes = {
       ["flowers:geranium"] = {
         input = {["flowers:geranium"] = 1},
         time = 4,
-        output = "dye:blue 4"
+        output = "dye:blue 4",
       },
     },
     output_size = 1,
     input_size = 1,
-    description = "Extracting"
+    description = "Extracting",
   },
   grinding = {
     recipes = {
       ["default:gold_ingot"] = {
         input = {["default:gold_ingot"] = 1},
         time = 3,
-        output = "technic:gold_dust"
+        output = "technic:gold_dust",
       },
       -- Additional path to "technic:gold_dust", so that we have two total.
       ["default:gold_lump"] = {
         input = {["default:gold_lump"] = 1},
         time = 3,
-        output = "technic:gold_dust 2"
-     },
+        output = "technic:gold_dust 2",
+      },
     },
     output_size = 1,
     input_size = 1,
-    description = "Grinding"
+    description = "Grinding",
   },
   alloy = {
     recipes = {
       ["technic:carbon_steel_dust/technic:coal_dust"] = {
-        input = {
-          ["technic:carbon_steel_dust"] = 1,
-          ["technic:coal_dust"] = 1
-        },
+        input = {["technic:carbon_steel_dust"] = 1, ["technic:coal_dust"] = 1},
         time = 3,
-        output = "technic:cast_iron_dust"
+        output = "technic:cast_iron_dust",
       },
     },
     output_size = 1,
     input_size = 2,
-    description = "Alloying"
+    description = "Alloying",
   },
   compressing = {
     recipes = {
       ["technic:carbon_cloth"] = {
         input = {["technic:carbon_cloth"] = 1},
         time = 4,
-        output = "technic:carbon_plate"
+        output = "technic:carbon_plate",
       },
     },
     output_size = 1,
     input_size = 1,
-    description = "Compressing"
+    description = "Compressing",
   },
 }
-
-
-
-
 
 -- Tests
 describe("CraftDB:_merge_craft_recipe_items", function()
@@ -136,16 +117,12 @@ describe("CraftDB:_merge_craft_recipe_items", function()
 
   it("string", function()
     local foo = CraftDB.new()
-    assert.same({["foo:bar"] = 4},
-                foo:_merge_craft_recipe_items("foo:bar 4"))
+    assert.same({["foo:bar"] = 4}, foo:_merge_craft_recipe_items("foo:bar 4"))
   end)
 
   it("table", function()
-    local _in = { "technic:copper_dust 3", "technic:tin_dust", }
-    local _expected = {
-      ["technic:copper_dust"] = 3,
-      ["technic:tin_dust"] = 1,
-    }
+    local _in = {"technic:copper_dust 3", "technic:tin_dust"}
+    local _expected = {["technic:copper_dust"] = 3, ["technic:tin_dust"] = 1}
     local foo = CraftDB.new()
     assert.same(_expected, foo:_merge_craft_recipe_items(_in))
   end)
@@ -168,14 +145,9 @@ describe("CraftDB:_import_technic_recipe", function()
     -- 'recipe' is a raw technic recipe.
     -- Copied directly from dump of 'technic.recipes'.
     local recipe = {
-      input = {
-        ["technic:bronze_dust"] = 4,
-      },
+      input = {["technic:bronze_dust"] = 4},
       time = 10,
-      output = {
-        "technic:copper_dust 3",
-        "technic:tin_dust",
-      },
+      output = {"technic:copper_dust 3", "technic:tin_dust"},
     }
 
     -- 'expected' is in our canonical format.
@@ -184,26 +156,16 @@ describe("CraftDB:_import_technic_recipe", function()
       ["technic:copper_dust"] = {
         [1] = {
           action = "separating",
-          inputs = {
-            ["technic:bronze_dust"] = 4
-          },
-          outputs = {
-            ["technic:copper_dust"] = 3,
-            ["technic:tin_dust"] = 1,
-          },
+          inputs = {["technic:bronze_dust"] = 4},
+          outputs = {["technic:copper_dust"] = 3, ["technic:tin_dust"] = 1},
           time = 10,
         },
       },
       ["technic:tin_dust"] = {
         [1] = {
           action = "separating",
-          inputs = {
-            ["technic:bronze_dust"] = 4
-          },
-          outputs = {
-            ["technic:copper_dust"] = 3,
-            ["technic:tin_dust"] = 1,
-          },
+          inputs = {["technic:bronze_dust"] = 4},
+          outputs = {["technic:copper_dust"] = 3, ["technic:tin_dust"] = 1},
           time = 10,
         },
       },
@@ -259,8 +221,10 @@ describe("CraftDB:import_technic_recipes", function()
       ["technic:cast_iron_dust"] = {
         [1] = {
           action = "alloy",
-          inputs = {["technic:carbon_steel_dust"] = 1,
-                    ["technic:coal_dust"] = 1},
+          inputs = {
+            ["technic:carbon_steel_dust"] = 1,
+            ["technic:coal_dust"] = 1,
+          },
           outputs = {["technic:cast_iron_dust"] = 1},
           time = 3,
         },
@@ -277,7 +241,7 @@ describe("CraftDB:import_technic_recipes", function()
           inputs = {["default:gold_lump"] = 1},
           outputs = {["technic:gold_dust"] = 2},
           time = 3,
-        }
+        },
       },
     }
 
@@ -297,7 +261,7 @@ describe("CraftDB:canonicalize_regular_recipe", function()
         "default:steel_ingot",
         "default:steel_ingot",
         [5] = "group:stick",
-        [8] = "group:stick"
+        [8] = "group:stick",
       },
       width = 3,
     }
@@ -305,9 +269,8 @@ describe("CraftDB:canonicalize_regular_recipe", function()
     local expected = {
       action = "normal",
       craft = {
-        { "default:steel_ingot", "default:steel_ingot", "default:steel_ingot" },
-        { "", "group:stick", "" },
-        { "", "group:stick", "" },
+        {"default:steel_ingot", "default:steel_ingot", "default:steel_ingot"},
+        {"", "group:stick", ""}, {"", "group:stick", ""},
       },
       inputs = {["default:steel_ingot"] = 3, ["group:stick"] = 2},
       outputs = {["default:pick_steel"] = 1},
@@ -358,7 +321,6 @@ describe("CraftDB:get_recipes", function()
     assert.same({}, output)
   end)
 
-
   it("invalid_item", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
@@ -370,15 +332,15 @@ describe("CraftDB:get_recipes", function()
     local expected = {
       {
         action = 'grinding',
-        inputs = { ['default:gold_ingot'] = 1 },
-        outputs = { ['technic:gold_dust'] = 1 },
+        inputs = {['default:gold_ingot'] = 1},
+        outputs = {['technic:gold_dust'] = 1},
         time = 3,
       }, {
         action = 'grinding',
-        inputs = { ['default:gold_lump'] = 1 },
-        outputs = { ['technic:gold_dust'] = 2 },
+        inputs = {['default:gold_lump'] = 1},
+        outputs = {['technic:gold_dust'] = 2},
         time = 3,
-      }
+      },
     }
 
     local foo = CraftDB.new()
@@ -391,20 +353,20 @@ describe("CraftDB:get_recipes", function()
     local expected = {
       {
         action = 'grinding',
-        inputs = { ['default:gold_ingot'] = 1 },
-        outputs = { ['technic:gold_dust'] = 1 },
+        inputs = {['default:gold_ingot'] = 1},
+        outputs = {['technic:gold_dust'] = 1},
         time = 3,
       }, {
         action = 'grinding',
-        inputs = { ['default:gold_lump'] = 1 },
-        outputs = { ['technic:gold_dust'] = 2 },
+        inputs = {['default:gold_lump'] = 1},
+        outputs = {['technic:gold_dust'] = 2},
         time = 3,
       }, {
         action = 'extracting',
         inputs = {["flowers:geranium"] = 1},
         outputs = {["dye:blue"] = 4},
         time = 4,
-      }
+      },
     }
 
     local foo = CraftDB.new()
@@ -416,7 +378,7 @@ end)
 
 describe("CraftDB:search_items", function()
   it("works_item_no_match", function()
-    local expected = { }
+    local expected = {}
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
@@ -425,15 +387,11 @@ describe("CraftDB:search_items", function()
   end)
 
   it("works_item_plain", function()
-    local expected = {
-      ['dye:blue'] = { inventory_image = 'bar.png'},
-    }
+    local expected = {['dye:blue'] = {inventory_image = 'bar.png'}}
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:search_items('dye:blue', {
-      want_images = true,
-    })
+    local output = foo:search_items('dye:blue', {want_images = true})
     assert.same(expected, output)
   end)
 
@@ -442,17 +400,15 @@ describe("CraftDB:search_items", function()
     foo:import_technic_recipes(technic_recipes)
 
     -- Using a non-string for the name_pattern will always return no matches.
-    assert.same({}, foo:search_items(nil, { substring_match = true, }))
-    assert.same({}, foo:search_items(0, { substring_match = true, }))
-    assert.same({}, foo:search_items(true, { substring_match = true, }))
-    assert.same({}, foo:search_items({}, { substring_match = true, }))
-    assert.same({}, foo:search_items(foo, { substring_match = true, }))
+    assert.same({}, foo:search_items(nil, {substring_match = true}))
+    assert.same({}, foo:search_items(0, {substring_match = true}))
+    assert.same({}, foo:search_items(true, {substring_match = true}))
+    assert.same({}, foo:search_items({}, {substring_match = true}))
+    assert.same({}, foo:search_items(foo, {substring_match = true}))
   end)
 
   it("works_item_substring_match", function()
-    local expected = {
-      ['dye:blue'] = { inventory_image = 'bar.png'},
-    }
+    local expected = {['dye:blue'] = {inventory_image = 'bar.png'}}
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
@@ -476,28 +432,26 @@ describe("CraftDB:search_items", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
 
-    assert.same(expected, foo:search_items('', { substring_match = true, }))
-    assert.same(expected, foo:search_items(':', { substring_match = true, }))
+    assert.same(expected, foo:search_items('', {substring_match = true}))
+    assert.same(expected, foo:search_items(':', {substring_match = true}))
 
     -- Test a few other patterns to ensure that they either don't crash, or
     -- return 0 matches.
-    assert.same({}, foo:search_items(';', { substring_match = true, }))
-    assert.same({}, foo:search_items('.', { substring_match = true, }))
-    assert.same({}, foo:search_items('(', { substring_match = true, }))
-    assert.same({}, foo:search_items(')', { substring_match = true, }))
+    assert.same({}, foo:search_items(';', {substring_match = true}))
+    assert.same({}, foo:search_items('.', {substring_match = true}))
+    assert.same({}, foo:search_items('(', {substring_match = true}))
+    assert.same({}, foo:search_items(')', {substring_match = true}))
   end)
 
   it("works_want_group", function()
     local expected = {
-      ['default:wood'] = { inventory_image = 'wood.png'},
-      ['default:aspen_wood'] = { inventory_image = 'aspen_wood.png'},
+      ['default:wood'] = {inventory_image = 'wood.png'},
+      ['default:aspen_wood'] = {inventory_image = 'aspen_wood.png'},
     }
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:search_items('group:wood', {
-      want_images = true,
-    })
+    local output = foo:search_items('group:wood', {want_images = true})
     assert.same(expected, output)
   end)
 
@@ -506,40 +460,27 @@ describe("CraftDB:search_items", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('group:wood', {
-      group_filter = {
-        ['non_existent-group'] = true,
-      },
+      group_filter = {['non_existent-group'] = true},
     })
     assert.same(expected, output)
   end)
 
   it("works_group_filter_boolean_include_antinogroup", function()
-    local expected = {
-      ['default:wood'] = {},
-      ['default:aspen_wood'] = {},
-    }
+    local expected = {['default:wood'] = {}, ['default:aspen_wood'] = {}}
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('group:wood', {
-      group_filter = {
-        ['non_existent-group'] = false,
-      },
+      group_filter = {['non_existent-group'] = false},
     })
     assert.same(expected, output)
   end)
 
   it("works_group_filter_boolean_include_group", function()
-    local expected = {
-      ['default:wood'] = {},
-      ['default:aspen_wood'] = {},
-    }
+    local expected = {['default:wood'] = {}, ['default:aspen_wood'] = {}}
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:search_items('group:wood', {
-      group_filter = {
-        ['choppy'] = true,
-      },
-    })
+    local output = foo:search_items('group:wood',
+                                    {group_filter = {['choppy'] = true}})
     assert.same(expected, output)
   end)
 
@@ -547,26 +488,17 @@ describe("CraftDB:search_items", function()
     local expected = {}
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:search_items('group:wood', {
-      group_filter = {
-        ['wood'] = false,
-      },
-    })
+    local output = foo:search_items('group:wood',
+                                    {group_filter = {['wood'] = false}})
     assert.same(expected, output)
   end)
 
   it("works_group_filter_number_include_group", function()
-    local expected = {
-      ['default:wood'] = {},
-      ['default:aspen_wood'] = {},
-    }
+    local expected = {['default:wood'] = {}, ['default:aspen_wood'] = {}}
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('group:wood', {
-      group_filter = {
-        ['choppy'] = 2,
-        ['wood'] = 1,
-      },
+      group_filter = {['choppy'] = 2, ['wood'] = 1},
     })
     assert.same(expected, output)
   end)
@@ -577,7 +509,7 @@ describe("CraftDB:search_items", function()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('group:wood', {
       group_filter = {
-        ['choppy'] = 3,  -- items have value 2.
+        ['choppy'] = 3, -- items have value 2.
         ['wood'] = 1,
       },
     })
@@ -585,18 +517,12 @@ describe("CraftDB:search_items", function()
   end)
 
   it("works_group_filter_number_include_group_2", function()
-    local expected = {
-      ['default:wood'] = {},
-      ['default:aspen_wood'] = {},
-    }
+    local expected = {['default:wood'] = {}, ['default:aspen_wood'] = {}}
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('', {
       substring_match = true,
-      group_filter = {
-        ['choppy'] = 2,
-        ['wood'] = 1,
-      },
+      group_filter = {['choppy'] = 2, ['wood'] = 1},
     })
     assert.same(expected, output)
   end)
@@ -610,10 +536,7 @@ describe("CraftDB:search_items", function()
     foo:import_technic_recipes(technic_recipes)
     local output = foo:search_items('', {
       substring_match = true,
-      group_filter = {
-        ['choppy'] = { sub_table_not_ok_here = true },
-        ['wood'] = 1,
-      },
+      group_filter = {['choppy'] = {sub_table_not_ok_here = true}, ['wood'] = 1},
     })
     assert.same(expected, output)
   end)
@@ -623,15 +546,11 @@ describe("CraftDB:search_items", function()
     -- minetest, as our fake test data is really insufficient for a good unit
     -- test here.  This just just makes sure that the option doesn't lead to
     -- an immediate crash.
-    local expected = {
-      ['dye:blue'] = { inventory_image = 'bar.png'},
-    }
+    local expected = {['dye:blue'] = {inventory_image = 'bar.png'}}
 
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
-    local output = foo:search_items('dye:blue', {
-      want_everything = true,
-    })
+    local output = foo:search_items('dye:blue', {want_everything = true})
     assert.same(expected, output)
 
   end)
@@ -640,7 +559,9 @@ describe("CraftDB:search_items", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
 
-    local function bar() return 42 end
+    local function bar()
+      return 42
+    end
 
     -- Very basic argument type checking.  For right now, if the player
     -- gives an incorrect type or range for some parameter, we don't care
@@ -651,24 +572,18 @@ describe("CraftDB:search_items", function()
     }
 
     local samples = {
-      {}, {nil}, {{nil}},
-      true, false, {true}, {false},
-      0, 1, -1, 3, 17.2, -42.1, -99999, 99999,
-      math.mininteger, math.maxinteger,
-      "0", "3", "25", "999999999999999999999999999999999999",
-      {0}, {1}, {-1}, {3}, {17.2}, {-42.1},
-      {{ {5}, {"hello"}, bar, false }},
-      {x = 1},
-      bar, {bar}, {x = bar},
-      {1, 2, "wood", bar},
-      {3, 2, nil, bar, "digistuff"},
+      {}, {nil}, {{nil}}, true, false, {true}, {false}, 0, 1, -1, 3, 17.2,
+      -42.1, -99999, 99999, math.mininteger, math.maxinteger, "0", "3", "25",
+      "999999999999999999999999999999999999", {0}, {1}, {-1}, {3}, {17.2},
+      {-42.1}, {{{5}, {"hello"}, bar, false}}, {x = 1}, bar, {bar}, {x = bar},
+      {1, 2, "wood", bar}, {3, 2, nil, bar, "digistuff"},
     }
 
     -- Call 'CraftDB:search_items()' for the full cartesean product
     for _, key in ipairs(options) do
       for _, value in ipairs(samples) do
         -- print(dump({ [key] = value }))
-        foo:search_items('', { [key] = value })
+        foo:search_items('', {[key] = value})
       end
     end
   end)

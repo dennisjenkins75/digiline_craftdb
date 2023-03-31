@@ -5,7 +5,9 @@ CraftDB = {}
 CraftDB.__index = CraftDB
 
 setmetatable(CraftDB, {
-  __call = function(cls, ...) return cls.new(...) end,
+  __call = function(cls, ...)
+    return cls.new(...)
+  end,
 })
 
 function CraftDB.new()
@@ -18,7 +20,6 @@ end
 function CraftDB:_get_technic_recipe_cache()
   return self.technic_recipe_cache
 end
-
 
 -- Debugging aid.
 local function _dump_table_to_file(table, filename)
@@ -33,7 +34,6 @@ local function _dump_table_to_file(table, filename)
   end
 end
 
-
 local function _make_table_from_strings(string_or_table)
   if type(string_or_table) == "string" then
     return {string_or_table}
@@ -43,7 +43,6 @@ local function _make_table_from_strings(string_or_table)
     return {}
   end
 end
-
 
 -- Creates a lookup table (key -> 1) from a list (int -> key).
 local function _make_lut_from_list(list)
@@ -79,7 +78,6 @@ local function copy_filtered_registration(registration)
   return result
 end
 
-
 -- Input: "recipe.output" from a regular or technic recipe.
 --    Input can be a single string or a table (indexed) list of strings.
 -- Returns: Table in our canonical format.
@@ -90,7 +88,9 @@ function CraftDB:_merge_craft_recipe_items(input_list)
   local result = {}
   local input_ = input_list
 
-  if (not input_list) or (input_list == "") then return {} end
+  if (not input_list) or (input_list == "") then
+    return {}
+  end
 
   if type(input_list) == "string" then
     input_ = {[1] = input_list}
@@ -118,10 +118,11 @@ function CraftDB:_merge_craft_recipe_items(input_list)
   return result
 end
 
-
 function CraftDB:_import_technic_recipe(typename, recipe)
   -- Handle nil input.
-  if not recipe then return end
+  if not recipe then
+    return
+  end
 
   -- recipe.output can be either a single string, or a table of strings.
   local outputs_ = self:_merge_craft_recipe_items(recipe.output)
@@ -145,13 +146,11 @@ function CraftDB:_import_technic_recipe(typename, recipe)
   end
 end
 
-
 -- Useful for debugging / testing, and for excluding some recipes.
 -- Return 'true' to allow the recipe, 'false' to reject it.
 function CraftDB:_filter_recipe(typename, recipe_name, recipe)
   return true
 end
-
 
 -- Imports filtered recipes from 'technic_recipes' into internal cache.
 -- In production, this comes from the technic mod as 'technic.recipes'.
@@ -159,8 +158,7 @@ end
 -- what I found in production on one random day).
 function CraftDB:import_technic_recipes(technic_recipes)
   -- Save for debugging, not required for operation.
-  _dump_table_to_file(technic_recipes,
-                      "digiline-craftdb-technic-raw.txt")
+  _dump_table_to_file(technic_recipes, "digiline-craftdb-technic-raw.txt")
 
   for typename, data in pairs(technic_recipes) do
     -- typename is 'separating', 'cooking', 'extracting', etc...
@@ -180,7 +178,6 @@ function CraftDB:import_technic_recipes(technic_recipes)
                       "digiline-craftdb-technic-imported.txt")
 end
 
-
 -- Converts regular recipe into our internal format.
 function CraftDB:canonicalize_regular_recipe(regular_recipe)
   local items = regular_recipe.items
@@ -193,9 +190,9 @@ function CraftDB:canonicalize_regular_recipe(regular_recipe)
     -- 'craft' should be in the same format as one would send to the
     -- autocrafter (eg, a 3x3 grid instead of a 9-element table).
     craft = {
-      { items[1] or "", items[2] or "", items[3] or "" },
-      { items[4] or "", items[5] or "", items[6] or "" },
-      { items[7] or "", items[8] or "", items[9] or "" }
+      {items[1] or "", items[2] or "", items[3] or ""},
+      {items[4] or "", items[5] or "", items[6] or ""},
+      {items[7] or "", items[8] or "", items[9] or ""},
     },
 
     -- NOTE: Regular recipes don't have a 'time', and the autocrafter produces
@@ -205,9 +202,10 @@ function CraftDB:canonicalize_regular_recipe(regular_recipe)
   }
 end
 
-
 function CraftDB:get_recipes(item_list)
-  if type(item_list) ~= 'table' then return {} end
+  if type(item_list) ~= 'table' then
+    return {}
+  end
 
   local result = {}
 
@@ -250,25 +248,27 @@ function CraftDB:get_recipes(item_list)
   return result
 end
 
-
 function CraftDB:search_items(name_pattern, options)
-  local matching_names = {}  -- list of names
+  local matching_names = {} -- list of names
 
-  if type(name_pattern) ~= 'string' then return {} end
+  if type(name_pattern) ~= 'string' then
+    return {}
+  end
 
-  if type(options) ~= 'table' then options = {} end
+  if type(options) ~= 'table' then
+    options = {}
+  end
 
   -- 'offset' must be an integer and >= 1.
   -- If not, set `offset` = 1.
   local offset = (type(options['offset']) == 'number') and
-                 math.max(1, math.floor(options['offset'])) or 1
+                     math.max(1, math.floor(options['offset'])) or 1
 
   -- 'max_count' must be an integer, and 1 <= max_count <= MAX_MATCHES.
   -- If not, set `max_count` = MAX_MATCHES.
   local max_count = (type(options['max_count']) == 'number') and
-              math.min(math.max(1, math.floor(options['max_count'])),
-                       MAX_MATCHES) or
-              MAX_MATCHES
+                        math.min(math.max(1, math.floor(options['max_count'])),
+                                 MAX_MATCHES) or MAX_MATCHES
 
   -- 'group_filter' might be nil, but if present, should always be a table.
   local group_filter = options['group_filter']
@@ -320,14 +320,14 @@ function CraftDB:search_items(name_pattern, options)
         -- membership.
         if type(filter_group_value) == 'boolean' then
           if (filter_group_value and not item_group_value) or
-             (not filter_group_value and item_group_value) then
+              (not filter_group_value and item_group_value) then
             return false
           end
         elseif type(filter_group_value) == 'number' then
           if filter_group_value ~= item_group_value then
             return false
           end
-        else  -- group metatype is unhandled; reject all items.
+        else -- group metatype is unhandled; reject all items.
           return false
         end
       end
