@@ -212,19 +212,21 @@ function CraftDB:get_recipes(item_list)
   local result = {}
 
   for _, item_name in ipairs(item_list) do
-    -- Start with our technic recipes.
-    local t = self.technic_recipe_cache[item_name]
-    if t then
-      for _, technic_recipe in ipairs(t) do
-        table.insert(result, technic_recipe)
+    if (type(item_name) == 'string') and (item_name:len() > 0) then
+      -- Start with our technic recipes.
+      local t = self.technic_recipe_cache[item_name]
+      if t then
+        for _, technic_recipe in ipairs(t) do
+          table.insert(result, technic_recipe)
+        end
       end
-    end
 
-    -- Add in regular crafting and cooking recipes.
-    local orig = minetest.get_all_craft_recipes(item_name)
-    if orig then
-      for _, regular_recipe in ipairs(orig) do
-        table.insert(result, self:canonicalize_regular_recipe(regular_recipe))
+      -- Add in regular crafting and cooking recipes.
+      local orig = minetest.get_all_craft_recipes(item_name)
+      if orig then
+        for _, regular_recipe in ipairs(orig) do
+          table.insert(result, self:canonicalize_regular_recipe(regular_recipe))
+        end
       end
     end
   end

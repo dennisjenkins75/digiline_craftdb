@@ -334,6 +334,31 @@ describe("CraftDB:get_recipes", function()
     assert.same({}, output)
   end)
 
+  -- Issue #16
+  it("invalid_item_name_nil", function()
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:get_recipes({nil})
+    assert.same({}, output)
+  end)
+
+  -- Issue #16
+  it("invalid_item_name_nil", function()
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:get_recipes({false})
+    assert.same({}, output)
+  end)
+
+  -- Issue #16
+  it("invalid_item_name_nil", function()
+    local foo = CraftDB.new()
+    foo:import_technic_recipes(technic_recipes)
+    local output = foo:get_recipes({42})
+    assert.same({}, output)
+  end)
+
+
   it("invalid_item", function()
     local foo = CraftDB.new()
     foo:import_technic_recipes(technic_recipes)
