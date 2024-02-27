@@ -142,7 +142,7 @@ minetest.after(initialization_delay, _delayed_init)
 minetest.register_node(minetest.get_current_modname() .. ":craftdb", {
   description = "Digiline Minetest Recipe Database",
   groups = {cracky = 3, oddly_breakable_by_hand = 2},
-	is_ground_content = false,
+  is_ground_content = false,
   tiles = {
     "digiline_craftdb_top.png", "jeija_microcontroller_bottom.png",
     "jeija_microcontroller_sides.png", "jeija_microcontroller_sides.png",
