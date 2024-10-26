@@ -1,4 +1,4 @@
-local DEBUG_MODE = false
+_merge_craft_recipe_itemslocal DEBUG_MODE = false
 local MAX_MATCHES = 50
 
 CraftDB = {}
@@ -181,24 +181,40 @@ end
 -- Converts regular recipe into our internal format.
 function CraftDB:canonicalize_regular_recipe(regular_recipe)
   local items = regular_recipe.items
+  local width=regular_recipe.width or 0
+  local craft
+  -- properly distribute items in 3x3 craft table according to width property of the recipe
+  if width==0 then
+    craft = {
+      {items[1] or "", items[2] or "", items[3] or ""},
+      {items[4] or "", items[5] or "", items[6] or ""},
+      {items[7] or "", items[8] or "", items[9] or ""},
+    }
+  elseif width==1 then
+    craft = {
+      {items[1] or "", "", ""},
+      {items[2] or "", "", ""},
+      {items[3] or "", "", ""},
+    }
+  elseif width==2 then
+    craft = {
+      {items[1] or "", items[2] or "", ""},
+      {items[3] or "", items[4] or "", ""},
+      {items[5] or "", items[6] or "", ""},
+    }
+  end
 
   return {
     action = regular_recipe.type,
     outputs = self:_merge_craft_recipe_items({regular_recipe.output}),
     inputs = self:_merge_craft_recipe_items(items),
-
+    craft = craft,
     -- 'craft' should be in the same format as one would send to the
     -- autocrafter (eg, a 3x3 grid instead of a 9-element table).
-    craft = {
-      {items[1] or "", items[2] or "", items[3] or ""},
-      {items[4] or "", items[5] or "", items[6] or ""},
-      {items[7] or "", items[8] or "", items[9] or ""},
-    },
-
     -- NOTE: Regular recipes don't have a 'time', and the autocrafter produces
     -- 1 item/s.  So that our API is consistent between 'regular' and 'technic'
     -- production methods, we'll put in a fake time here.
-    time = 1,
+    time = 1
   }
 end
 
