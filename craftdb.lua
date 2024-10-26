@@ -1,4 +1,4 @@
-_merge_craft_recipe_itemslocal DEBUG_MODE = false
+local DEBUG_MODE = false
 local MAX_MATCHES = 50
 
 CraftDB = {}
