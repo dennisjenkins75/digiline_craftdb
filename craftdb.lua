@@ -181,26 +181,26 @@ end
 -- Converts regular recipe into our internal format.
 function CraftDB:canonicalize_regular_recipe(regular_recipe)
   local items = regular_recipe.items
-  local width=regular_recipe.width or 0
+  local width = regular_recipe.width or 0
   local craft
   -- properly distribute items in 3x3 craft table according to width property of the recipe
-  if width==0 then
-    craft = {
-      {items[1] or "", items[2] or "", items[3] or ""},
-      {items[4] or "", items[5] or "", items[6] or ""},
-      {items[7] or "", items[8] or "", items[9] or ""},
-    }
-  elseif width==1 then
+  if width == 1 then
     craft = {
       {items[1] or "", "", ""},
       {items[2] or "", "", ""},
       {items[3] or "", "", ""},
     }
-  elseif width==2 then
+  elseif width == 2 then
     craft = {
       {items[1] or "", items[2] or "", ""},
       {items[3] or "", items[4] or "", ""},
       {items[5] or "", items[6] or "", ""},
+    }
+  else
+    craft = {
+      {items[1] or "", items[2] or "", items[3] or ""},
+      {items[4] or "", items[5] or "", items[6] or ""},
+      {items[7] or "", items[8] or "", items[9] or ""},
     }
   end
 
